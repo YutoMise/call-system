@@ -1,0 +1,16 @@
+services:
+  call-system:
+    container_name: call-system
+    build: .
+    restart: unless-stopped
+    environment:
+      TZ: Asia/Tokyo
+    networks:
+      - app_network
+    ports:
+      - "3002:3002"
+    volumes:
+      - ./channels.json:/app/channels.json
+networks:
+  app_network:
+    driver: bridge

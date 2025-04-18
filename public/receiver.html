@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>呼び出しシステム(受信側)</title>
+    <link rel="shortcut icon" href="/icons/favicon.ico" type="image/x-icon">
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon-180x180.webp" sizes="180x180">
+
+    <meta property="og:title" content="呼び出しシステム(受信側)" />
+    <meta property="og:description" content="送信側から受け取った整理券番号と診察室番号を合成音声で読み上げます。" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://call.myuto.net/receiver" />
+    <meta property="og:image" content="https://call.myuto.net/icons/call.png" />
+    <meta property="og:site_name" content="呼び出しシステム" />
+
+    <link rel="stylesheet" href="/css/receiver.css">
+</head>
+<body>
+    <header>
+        <a href="../" class="page-button sender-button">送信側</a>
+        <a href="#" class="page-button receiver-button current-page">受信側</a>
+    </header>
+
+    <h1>音声再生クライアント</h1>
+
+    <div id="controls">
+        <label for="channelSelect">チャンネル:</label>
+        <select id="channelSelect"></select>
+        <br>
+        <label for="channelPassword">パスワード:</label>
+        <input type="password" id="channelPassword">
+        <br>
+        <button id="subscribeButton">チャンネルに接続</button>
+        <button id="unsubscribeButton" disabled>接続解除</button>
+        <button id="refreshChannels" title="チャンネルリストを更新">更新</button>
+    </div>
+
+    <div id="status">初期化中...</div>
+    <div id="log"></div>
+
+    <script src="/js/receiver.js"></script>
+</body>
+</html>
