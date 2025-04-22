@@ -119,10 +119,74 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     */
 
-    // --- 既存の他の初期化コードやイベントリスナー ---
-    // (ここに元々あった index.js の他のコードが続くと想定)
+    document.addEventListener('keydown', (e) => {
+        // '*' キーが押された場合
+        if (e.key === "*") {
+            e.preventDefault();
+
+            // 現在フォーカスされている要素を取得
+            const currentElement = document.activeElement;
+
+            // フォーカス可能な要素のリストを取得
+            const focusableElements = Array.from(
+                document.querySelectorAll(
+                    'a[href], area[href], input:not([disabled]):not([type="hidden"]), select:not([disabled]), textarea:not([disabled]), button:not([disabled]), iframe, [tabindex]:not([tabindex="-1"]), [contenteditable="true"]'
+                )
+            ).filter(el => el.offsetWidth > 0 || el.offsetHeight > 0 || el === document.activeElement);
+
+            // フォーカス可能な要素がない場合
+            if (focusableElements.length === 0) return;
+
+            const currentIndex = focusableElements.indexOf(currentElement);
+
+            // 次の要素のインデックスを計算
+            const nextIndex = (currentIndex + 1) % focusableElements.length;
+
+            // 次の要素にフォーカスを移動
+            focusableElements[nextIndex].focus();
+        }
+        // '-' キーが押された場合
+        else if (e.key === '-') {
+            const activeElement = document.activeElement;
+            // INPUT または TEXTAREA 要素にフォーカスがある場合のみ実行
+            if (activeElement && (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA')) {
+                // テキスト入力系の input type かどうかをもう少し限定する場合
+                const textInputTypes = ['text', 'password', 'email', 'number', 'search', 'tel', 'url'];
+                if (activeElement.tagName === 'TEXTAREA' || (activeElement.tagName === 'INPUT' && textInputTypes.includes(activeElement.type.toLowerCase())) ) {
+                    e.preventDefault(); // '-' の入力を防ぐ
+
+                    const inputElement = activeElement;
+                    const start = inputElement.selectionStart;
+                    const end = inputElement.selectionEnd;
+                    const value = inputElement.value;
+
+                    if (start === end && start > 0) {
+                        // カーソルがあり、先頭でない場合: カーソルの前の1文字を削除
+                        inputElement.value = value.substring(0, start - 1) + value.substring(end);
+                        inputElement.setSelectionRange(start - 1, start - 1); // カーソル位置を更新
+                    } else if (start < end) {
+                        // テキストが選択されている場合: 選択範囲を削除
+                        inputElement.value = value.substring(0, start) + value.substring(end);
+                        inputElement.setSelectionRange(start, start); // カーソル位置を選択開始位置に更新
+                    }
+                    // カーソルが先頭にある場合などは何もしない
+                     const inputEvent = new Event('input', { bubbles: true, cancelable: true });
+                     inputElement.dispatchEvent(inputEvent);
+                }
+            }
+        }
+    });
+    // ウインドウクリックで整理券番号にフォーカスを合わせる
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('input, button, select, a, textarea, label')) {
+            if (ticketNumberInput && ticketNumberInput.offsetParent !== null) {
+                ticketNumberInput.focus();
+            }
+        }
+    });
 
 });
+
 
 // 必要に応じて、チャンネルリストを更新する関数 (例)
 async function updateChannelList() {
