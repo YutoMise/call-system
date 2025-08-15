@@ -171,138 +171,6 @@
             color: #6c757d;
             margin-top: 5px;
         }
-
-        /* 新しいチャンネル管理UI用のスタイル */
-        .add-channel-form {
-            background: #f8f9fa;
-            border: 1px solid #dee2e6;
-            border-radius: 5px;
-            padding: 20px;
-            margin-bottom: 30px;
-        }
-
-        .add-channel-form h3 {
-            color: #495057;
-            margin-bottom: 15px;
-        }
-
-        .form-row {
-            display: flex;
-            gap: 15px;
-            align-items: end;
-        }
-
-        .form-row .form-group {
-            flex: 1;
-            margin-bottom: 0;
-        }
-
-        .form-row .form-group:last-child {
-            flex: 0 0 auto;
-        }
-
-        .form-row select {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #ddd;
-            border-radius: 5px;
-            font-size: 16px;
-            transition: border-color 0.3s;
-        }
-
-        .form-row select:focus {
-            outline: none;
-            border-color: #667eea;
-        }
-
-        .channels-list {
-            margin-bottom: 30px;
-        }
-
-        .channels-list h3 {
-            color: #495057;
-            margin-bottom: 15px;
-        }
-
-        .channel-row {
-            background: white;
-            border: 1px solid #dee2e6;
-            border-radius: 5px;
-            padding: 15px;
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .channel-info {
-            flex: 1;
-            display: flex;
-            gap: 20px;
-        }
-
-        .channel-field {
-            flex: 1;
-        }
-
-        .channel-field label {
-            font-size: 12px;
-            color: #6c757d;
-            margin-bottom: 3px;
-        }
-
-        .channel-field input,
-        .channel-field select {
-            margin-bottom: 0;
-            width: 100%;
-            padding: 8px;
-            border: 1px solid #dee2e6;
-            border-radius: 4px;
-        }
-
-        .channel-field select:focus,
-        .channel-field input:focus {
-            outline: none;
-            border-color: #667eea;
-        }
-
-        .channel-actions {
-            display: flex;
-            gap: 5px;
-        }
-
-        .btn-small {
-            padding: 6px 12px;
-            font-size: 14px;
-            margin: 0;
-        }
-
-        .btn-primary {
-            background: #007bff;
-        }
-
-        .btn-success {
-            background: #28a745;
-        }
-
-        .json-editor-section {
-            border-top: 1px solid #dee2e6;
-            padding-top: 20px;
-        }
-
-        .json-editor-section details summary {
-            cursor: pointer;
-            padding: 10px;
-            background: #f8f9fa;
-            border: 1px solid #dee2e6;
-            border-radius: 5px;
-            margin-bottom: 10px;
-        }
-
-        .action-buttons {
-            margin-top: 20px;
-            text-align: center;
-        }
     </style>
 </head>
 <body>
@@ -334,60 +202,22 @@
                 <div id="currentChannels"></div>
             </div>
             
-            <h2>チャンネル管理</h2>
-
-            <!-- 新しいチャンネル追加フォーム -->
-            <div class="add-channel-form">
-                <h3>新しいチャンネルを追加</h3>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="newChannelName">チャンネル名:</label>
-                        <input type="text" id="newChannelName" placeholder="チャンネル名を入力">
-                    </div>
-                    <div class="form-group">
-                        <label for="newChannelPassword">パスワード:</label>
-                        <input type="password" id="newChannelPassword" placeholder="パスワードを入力">
-                    </div>
-                    <div class="form-group">
-                        <label for="newChannelVoice">音声:</label>
-                        <select id="newChannelVoice">
-                            <option value="voice1">音声1</option>
-                            <option value="voice2">音声2</option>
-                            <option value="voice3">音声3</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <button class="btn btn-primary" onclick="addChannel()">追加</button>
-                    </div>
+            <h2>チャンネル設定を編集</h2>
+            <div class="form-group">
+                <label for="channelsJson">channels.json の内容:</label>
+                <textarea id="channelsJson" placeholder='[
+  {"name": "channel1", "password": "password1"},
+  {"name": "channel2", "password": "password2"}
+]'></textarea>
+                <div class="help-text">
+                    JSON形式でチャンネル情報を入力してください。各チャンネルには "name" と "password" が必要です。
                 </div>
             </div>
-
-            <!-- チャンネル一覧 -->
-            <div class="channels-list">
-                <h3>チャンネル一覧</h3>
-                <div id="channelsList"></div>
-            </div>
-
-            <!-- JSON編集セクション -->
-            <div class="json-editor-section">
-                <details>
-                    <summary>JSON直接編集（上級者向け）</summary>
-                    <div class="form-group">
-                        <label for="channelsJson">チャンネル設定JSON:</label>
-                        <textarea id="channelsJson" placeholder="チャンネル設定をJSON形式で入力してください..."></textarea>
-                        <div class="help-text">
-                            形式: [{"name": "チャンネル名", "password": "パスワード", "voiceId": "voice1"}]
-                        </div>
-                    </div>
-                    <button class="btn" onclick="saveChannelsFromJson()">JSON から保存</button>
-                </details>
-            </div>
-
-            <div class="action-buttons">
-                <button class="btn btn-secondary" onclick="loadChannels()">リロード</button>
-                <button class="btn btn-danger" onclick="resetToDefault()">デフォルトに戻す</button>
-            </div>
-
+            
+            <button class="btn" onclick="saveChannels()">保存</button>
+            <button class="btn btn-secondary" onclick="loadChannels()">リロード</button>
+            <button class="btn btn-danger" onclick="resetToDefault()">デフォルトに戻す</button>
+            
             <div id="adminMessage" class="message"></div>
         </div>
     </div>
@@ -460,21 +290,10 @@
                     showLoginForm();
                     return;
                 }
-
+                
                 const channels = await response.json();
-
-                // JSONテキストエリアを更新（存在する場合のみ）
-                const jsonTextarea = document.getElementById('channelsJson');
-                if (jsonTextarea) {
-                    jsonTextarea.value = JSON.stringify(channels, null, 2);
-                }
-
+                document.getElementById('channelsJson').value = JSON.stringify(channels, null, 2);
                 displayCurrentChannels(channels);
-
-                // フォームもクリア
-                document.getElementById('newChannelName').value = '';
-                document.getElementById('newChannelPassword').value = '';
-                document.getElementById('newChannelVoice').value = 'voice1';
             } catch (error) {
                 showMessage('adminMessage', 'チャンネル情報の読み込みに失敗しました。', 'error');
             }
@@ -484,7 +303,7 @@
         function displayCurrentChannels(channels) {
             const container = document.getElementById('currentChannels');
             container.innerHTML = '';
-
+            
             channels.forEach(channel => {
                 const div = document.createElement('div');
                 div.className = 'channel-item';
@@ -494,190 +313,36 @@
                 `;
                 container.appendChild(div);
             });
-
-            // チャンネル一覧も更新
-            displayChannelsList(channels);
-        }
-
-        // チャンネル一覧を表示（編集可能）
-        function displayChannelsList(channels) {
-            const container = document.getElementById('channelsList');
-            container.innerHTML = '';
-
-            channels.forEach((channel, index) => {
-                const div = document.createElement('div');
-                div.className = 'channel-row';
-                const voiceId = channel.voiceId || 'voice1'; // デフォルト値
-                div.innerHTML = `
-                    <div class="channel-info">
-                        <div class="channel-field">
-                            <label>チャンネル名</label>
-                            <input type="text" value="${escapeHtml(channel.name)}" id="channelName_${index}">
-                        </div>
-                        <div class="channel-field">
-                            <label>パスワード</label>
-                            <input type="password" value="${escapeHtml(channel.password)}" id="channelPassword_${index}">
-                        </div>
-                        <div class="channel-field">
-                            <label>音声</label>
-                            <select id="channelVoice_${index}">
-                                <option value="voice1" ${voiceId === 'voice1' ? 'selected' : ''}>音声1</option>
-                                <option value="voice2" ${voiceId === 'voice2' ? 'selected' : ''}>音声2</option>
-                                <option value="voice3" ${voiceId === 'voice3' ? 'selected' : ''}>音声3</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="channel-actions">
-                        <button class="btn btn-success btn-small" onclick="updateChannel(${index})">更新</button>
-                        <button class="btn btn-danger btn-small" onclick="deleteChannel(${index})">削除</button>
-                    </div>
-                `;
-                container.appendChild(div);
-            });
         }
         
-        // 新しいチャンネルを追加
-        async function addChannel() {
-            const name = document.getElementById('newChannelName').value.trim();
-            const password = document.getElementById('newChannelPassword').value.trim();
-            const voiceId = document.getElementById('newChannelVoice').value;
-
-            if (!name || !password) {
-                showMessage('adminMessage', 'チャンネル名とパスワードを入力してください。', 'error');
-                return;
-            }
-
-            try {
-                // 現在のチャンネル一覧を取得
-                const response = await fetch('/admin/api/channels');
-                if (response.status === 401) {
-                    showLoginForm();
-                    return;
-                }
-
-                const channels = await response.json();
-
-                // 重複チェック
-                if (channels.some(channel => channel.name === name)) {
-                    showMessage('adminMessage', 'そのチャンネル名は既に存在します。', 'error');
-                    return;
-                }
-
-                // 新しいチャンネルを追加（voiceIdを含む）
-                channels.push({ name, password, voiceId });
-
-                await saveChannelsData(channels);
-
-                // フォームをクリア
-                document.getElementById('newChannelName').value = '';
-                document.getElementById('newChannelPassword').value = '';
-                document.getElementById('newChannelVoice').value = 'voice1'; // デフォルトに戻す
-
-            } catch (error) {
-                showMessage('adminMessage', 'チャンネルの追加に失敗しました。', 'error');
-            }
-        }
-
-        // チャンネルを更新
-        async function updateChannel(index) {
-            const name = document.getElementById(`channelName_${index}`).value.trim();
-            const password = document.getElementById(`channelPassword_${index}`).value.trim();
-            const voiceId = document.getElementById(`channelVoice_${index}`).value;
-
-            if (!name || !password) {
-                showMessage('adminMessage', 'チャンネル名とパスワードを入力してください。', 'error');
-                return;
-            }
-
-            try {
-                // 現在のチャンネル一覧を取得
-                const response = await fetch('/admin/api/channels');
-                if (response.status === 401) {
-                    showLoginForm();
-                    return;
-                }
-
-                const channels = await response.json();
-
-                // 重複チェック（自分以外）
-                if (channels.some((channel, i) => i !== index && channel.name === name)) {
-                    showMessage('adminMessage', 'そのチャンネル名は既に存在します。', 'error');
-                    return;
-                }
-
-                // チャンネルを更新（voiceIdを含む）
-                channels[index] = { name, password, voiceId };
-
-                await saveChannelsData(channels);
-
-            } catch (error) {
-                showMessage('adminMessage', 'チャンネルの更新に失敗しました。', 'error');
-            }
-        }
-
-        // チャンネルを削除
-        async function deleteChannel(index) {
-            if (!confirm('このチャンネルを削除しますか？')) {
-                return;
-            }
-
-            try {
-                // 現在のチャンネル一覧を取得
-                const response = await fetch('/admin/api/channels');
-                if (response.status === 401) {
-                    showLoginForm();
-                    return;
-                }
-
-                const channels = await response.json();
-
-                // チャンネルを削除
-                channels.splice(index, 1);
-
-                await saveChannelsData(channels);
-
-            } catch (error) {
-                showMessage('adminMessage', 'チャンネルの削除に失敗しました。', 'error');
-            }
-        }
-
-        // チャンネルデータを保存（共通関数）
-        async function saveChannelsData(channels) {
-            const response = await fetch('/admin/api/channels', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(channels)
-            });
-
-            if (response.status === 401) {
-                showLoginForm();
-                return;
-            }
-
-            const data = await response.json();
-
-            if (data.success) {
-                showMessage('adminMessage', data.message, 'success');
-                displayCurrentChannels(channels);
-                // JSONテキストエリアも更新（存在する場合のみ）
-                const jsonTextarea = document.getElementById('channelsJson');
-                if (jsonTextarea) {
-                    jsonTextarea.value = JSON.stringify(channels, null, 2);
-                }
-            } else {
-                showMessage('adminMessage', data.message, 'error');
-            }
-        }
-
-        // JSONから保存（従来の機能）
-        async function saveChannelsFromJson() {
+        // チャンネル情報を保存
+        async function saveChannels() {
             const jsonText = document.getElementById('channelsJson').value;
-
+            
             try {
                 const channels = JSON.parse(jsonText);
-                await saveChannelsData(channels);
+                
+                const response = await fetch('/admin/api/channels', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(channels)
+                });
+                
+                if (response.status === 401) {
+                    showLoginForm();
+                    return;
+                }
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showMessage('adminMessage', data.message, 'success');
+                    displayCurrentChannels(channels);
+                } else {
+                    showMessage('adminMessage', data.message, 'error');
+                }
             } catch (error) {
                 if (error instanceof SyntaxError) {
                     showMessage('adminMessage', 'JSON形式が正しくありません。', 'error');
@@ -688,20 +353,15 @@
         }
         
         // デフォルト設定に戻す
-        async function resetToDefault() {
+        function resetToDefault() {
             if (confirm('デフォルト設定に戻しますか？')) {
                 const defaultChannels = [
-                    {"name": "yaesu", "password": "orca", "voiceId": "voice1"},
-                    {"name": "chiba", "password": "orca", "voiceId": "voice1"},
-                    {"name": "familia", "password": "orca", "voiceId": "voice1"},
-                    {"name": "marunouchi", "password": "orca", "voiceId": "voice1"}
+                    {"name": "yaesu", "password": "orca"},
+                    {"name": "chiba", "password": "orca"},
+                    {"name": "familia", "password": "orca"},
+                    {"name": "marunouchi", "password": "orca"}
                 ];
-
-                try {
-                    await saveChannelsData(defaultChannels);
-                } catch (error) {
-                    showMessage('adminMessage', 'デフォルト設定への復元に失敗しました。', 'error');
-                }
+                document.getElementById('channelsJson').value = JSON.stringify(defaultChannels, null, 2);
             }
         }
         

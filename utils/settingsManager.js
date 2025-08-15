@@ -5,7 +5,6 @@ const axios = require('axios');
 
 const SETTINGS_FILE_PATH = path.join(__dirname, '..', 'settings.json'); // ルートからの相対パス
 const VOICEVOX_BASE_URL = process.env.VOICEVOX_URL || 'http://voicevox_engine:50021';
-const DISABLE_VOICEVOX = process.env.DISABLE_VOICEVOX === 'true';
 
 // --- 状態 ---
 let currentSettings = {
@@ -58,25 +57,8 @@ async function saveSettings(speakerId, pitch, speedScale) {
 }
 
 async function fetchAvailableSpeakers() {
-    if (DISABLE_VOICEVOX) {
-        console.log('[Voicevox] Voicevoxエンジンが無効化されています。デフォルト話者を使用します。');
-        availableSpeakers = [
-            {
-                "name": "デフォルト話者",
-                "speaker_uuid": "default",
-                "styles": [
-                    {
-                        "name": "ノーマル",
-                        "id": 6,
-                        "type": "talk"
-                    }
-                ]
-            }
-        ];
-        return;
-    }
-
-    try {
+    // ... (以前 index.js にあった fetchAvailableSpeakers の実装、availableSpeakers の更新を含む) ...
+     try {
         console.log(`[Voicevox] 話者リストを ${VOICEVOX_BASE_URL}/speakers から取得中...`);
         const response = await axios.get(`${VOICEVOX_BASE_URL}/speakers`);
         availableSpeakers = response.data; // グローバル変数に格納
@@ -100,13 +82,6 @@ async function synthesizeSpeechInternal(text) {
     if (!text) {
         throw new Error("合成するテキストが空です。");
     }
-
-    if (DISABLE_VOICEVOX) {
-        console.log(`[音声合成スキップ] Voicevoxが無効化されています。Text='${text}'`);
-        // ダミーのバイナリデータを返す（実際の音声ファイルではない）
-        return Buffer.from('dummy audio data');
-    }
-
     // 現在の設定を使用
     const speaker = currentSettings.speakerId;
     const pitch = currentSettings.pitch;

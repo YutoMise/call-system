@@ -5,12 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node index.js",
-    "start:local": "node -r dotenv/config index.js dotenv_config_path=.env.local",
-    "dev": "npm run start:local",
-    "update-speakers": "node scripts/update-speakers.js",
-    "generate-audio": "node scripts/generate-audio.js",
-    "generate-samples": "node scripts/generate-samples.js"
+    "start": "node index.js"
   },
   "keywords": [],
   "author": "",

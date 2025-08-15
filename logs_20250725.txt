@@ -1,0 +1,166 @@
+call-system  | 
+call-system  | > call-system@1.0.0 start
+call-system  | > node index.js
+call-system  | 
+call-system  | [設定] settings.json から設定を読み込みました: { speakerId: 6, pitch: 0, speedScale: 1.05 }
+call-system  | [Voicevox] 話者リストを http://voicevox_engine:50021/speakers から取得中...
+call-system  | 2025/07/25 05:01:15: チャンネルデータを読み込みました: [ 'yaesu', 'chiba', 'familia', 'marunouchi', 'tsic' ]
+call-system  | [Voicevox] 話者リスト取得完了。
+call-system  | 2025/07/25 05:01:15: サーバー起動完了 Port: 3002
+call-system  | 2025/07/25 05:01:15: 現在のVoicevox設定: SpeakerID=6, Pitch=0
+call-system  | 2025/07/25 05:01:15: 操作用ページ: http://localhost:3002
+call-system  | 2025/07/25 05:01:15: 音声再生用ページ: http://localhost:3002/receiver
+call-system  | 2025/07/25 05:01:15: 設定ページURL (開発者用): http://localhost:3002/voicevox-settings
+call-system  | 2025/07/25 08:46:41: クライアント AkbnCJYXezAxfsoTmhyWiPwVtGOaSJdR がチャンネル「chiba」接続開始
+call-system  | 2025/07/25 08:46:41: クライアント AkbnCJYXezAxfsoTmhyWiPwVtGOaSJdR が接続開始 (チャンネル: chiba)。現在 1 クライアント。
+call-system  | 2025/07/25 08:47:51: チャンネル「chiba」の 1 クライアントに送信: play-announcement
+call-system  | 2025/07/25 08:47:51: アナウンス送信 -> チャンネル「chiba」: 整理券 101, 診察室 2
+call-system  | 2025/07/25 08:53:03: クライアント AkbnCJYXezAxfsoTmhyWiPwVtGOaSJdR が接続終了 (チャンネル: chiba)。残り 0 クライアント。
+call-system  | 2025/07/25 08:53:06: クライアント AkbnCJYXezAxfsoTmhyWiPwVtGOaSJdR が接続開始 (チャンネル: chiba)。現在 1 クライアント。
+call-system  | 2025/07/25 08:54:39: クライアント AkbnCJYXezAxfsoTmhyWiPwVtGOaSJdR が接続終了 (チャンネル: chiba)。残り 0 クライアント。
+call-system  | 2025/07/25 08:54:42: クライアント AkbnCJYXezAxfsoTmhyWiPwVtGOaSJdR が接続開始 (チャンネル: chiba)。現在 1 クライアント。
+call-system  | 2025/07/25 08:54:48: クライアント AkbnCJYXezAxfsoTmhyWiPwVtGOaSJdR が接続終了 (チャンネル: chiba)。残り 0 クライアント。
+call-system  | 2025/07/25 08:54:51: クライアント AkbnCJYXezAxfsoTmhyWiPwVtGOaSJdR が接続開始 (チャンネル: chiba)。現在 1 クライアント。
+call-system  | 2025/07/25 09:03:56: チャンネル「chiba」の 1 クライアントに送信: play-announcement
+call-system  | 2025/07/25 09:03:56: アナウンス送信 -> チャンネル「chiba」: 整理券 276, 診察室 3
+call-system  | 2025/07/25 09:04:51: チャンネル「chiba」の 1 クライアントに送信: play-announcement
+call-system  | 2025/07/25 09:04:51: アナウンス送信 -> チャンネル「chiba」: 整理券 227, 診察室 1
+call-system  | 2025/07/25 09:05:50: チャンネル「chiba」の 1 クライアントに送信: play-announcement
+call-system  | 2025/07/25 09:05:50: アナウンス送信 -> チャンネル「chiba」: 整理券 275, 診察室 2
+call-system  | 2025/07/25 09:09:27: チャンネル「chiba」の 1 クライアントに送信: play-announcement
+call-system  | 2025/07/25 09:09:27: アナウンス送信 -> チャンネル「chiba」: 整理券 293, 診察室 4
+call-system  | 2025/07/25 09:11:06: チャンネル「chiba」の 1 クライアントに送信: play-announcement
+call-system  | 2025/07/25 09:11:06: アナウンス送信 -> チャンネル「chiba」: 整理券 285, 診察室 2
+call-system  | 2025/07/25 09:14:00: チャンネル「chiba」の 1 クライアントに送信: play-announcement
+call-system  | 2025/07/25 09:14:00: アナウンス送信 -> チャンネル「chiba」: 整理券 275, 診察室 3
+call-system  | 2025/07/25 09:15:44: チャンネル「chiba」の 1 クライアントに送信: play-announcement
+call-system  | 2025/07/25 09:15:44: アナウンス送信 -> チャンネル「chiba」: 整理券 274, 診察室 1
+call-system  | 2025/07/25 09:16:42: チャンネル「chiba」の 1 クライアントに送信: play-announcement
+call-system  | 2025/07/25 09:16:42: アナウンス送信 -> チャンネル「chiba」: 整理券 253, 診察室 2
+call-system  | 2025/07/25 09:29:35: チャンネル「chiba」の 1 クライアントに送信: play-announcement
+call-system  | 2025/07/25 09:29:35: アナウンス送信 -> チャンネル「chiba」: 整理券 287, 診察室 4
+call-system  | 2025/07/25 09:30:04: チャンネル「chiba」の 1 クライアントに送信: play-announcement
+call-system  | 2025/07/25 09:30:04: アナウンス送信 -> チャンネル「chiba」: 整理券 293, 診察室 3
+call-system  | 2025/07/25 09:30:28: チャンネル「chiba」の 1 クライアントに送信: play-announcement
+call-system  | 2025/07/25 09:30:28: アナウンス送信 -> チャンネル「chiba」: 整理券 285, 診察室 1
+call-system  | 2025/07/25 09:33:09: チャンネル「chiba」の 1 クライアントに送信: play-announcement
+call-system  | 2025/07/25 09:33:09: アナウンス送信 -> チャンネル「chiba」: 整理券 263, 診察室 4
+call-system  | 2025/07/25 09:34:57: チャンネル「chiba」の 1 クライアントに送信: play-announcement
+call-system  | 2025/07/25 09:34:57: アナウンス送信 -> チャンネル「chiba」: 整理券 297, 診察室 3
+call-system  | 2025/07/25 09:36:59: チャンネル「chiba」の 1 クライアントに送信: play-announcement
+call-system  | 2025/07/25 09:36:59: アナウンス送信 -> チャンネル「chiba」: 整理券 299, 診察室 4
+call-system  | 2025/07/25 09:42:22: チャンネル「chiba」の 1 クライアントに送信: play-announcement
+call-system  | 2025/07/25 09:42:22: アナウンス送信 -> チャンネル「chiba」: 整理券 253, 診察室 4
+call-system  | 2025/07/25 09:51:09: チャンネル「chiba」の 1 クライアントに送信: play-announcement
+call-system  | 2025/07/25 09:51:09: アナウンス送信 -> チャンネル「chiba」: 整理券 213, 診察室 2
+call-system  | 2025/07/25 10:03:56: チャンネル「chiba」の 1 クライアントに送信: play-announcement
+call-system  | 2025/07/25 10:03:56: アナウンス送信 -> チャンネル「chiba」: 整理券 213, 診察室 3
+call-system  | 2025/07/25 10:05:36: チャンネル「chiba」の 1 クライアントに送信: play-announcement
+call-system  | 2025/07/25 10:05:36: アナウンス送信 -> チャンネル「chiba」: 整理券 253, 診察室 4
+call-system  | 2025/07/25 10:09:37: チャンネル「chiba」の 1 クライアントに送信: play-announcement
+call-system  | 2025/07/25 10:09:37: アナウンス送信 -> チャンネル「chiba」: 整理券 231, 診察室 4
+call-system  | 2025/07/25 10:11:25: チャンネル「chiba」の 1 クライアントに送信: play-announcement
+call-system  | 2025/07/25 10:11:25: アナウンス送信 -> チャンネル「chiba」: 整理券 204, 診察室 3
+call-system  | 2025/07/25 10:25:00: チャンネル「chiba」の 1 クライアントに送信: play-announcement
+call-system  | 2025/07/25 10:25:00: アナウンス送信 -> チャンネル「chiba」: 整理券 258, 診察室 2
+call-system  | 2025/07/25 10:25:42: チャンネル「chiba」の 1 クライアントに送信: play-announcement
+call-system  | 2025/07/25 10:25:42: アナウンス送信 -> チャンネル「chiba」: 整理券 260, 診察室 3
+call-system  | 2025/07/25 10:28:57: チャンネル「chiba」の 1 クライアントに送信: play-announcement
+call-system  | 2025/07/25 10:28:57: アナウンス送信 -> チャンネル「chiba」: 整理券 277, 診察室 3
+call-system  | 2025/07/25 10:29:33: チャンネル「chiba」の 1 クライアントに送信: play-announcement
+call-system  | 2025/07/25 10:29:33: アナウンス送信 -> チャンネル「chiba」: 整理券 279, 診察室 2
+call-system  | 2025/07/25 10:43:23: チャンネル「chiba」の 1 クライアントに送信: play-announcement
+call-system  | 2025/07/25 10:43:23: アナウンス送信 -> チャンネル「chiba」: 整理券 252, 診察室 3
+call-system  | 2025/07/25 10:53:14: チャンネル「chiba」の 1 クライアントに送信: play-announcement
+call-system  | 2025/07/25 10:53:14: アナウンス送信 -> チャンネル「chiba」: 整理券 279, 診察室 3
+call-system  | 2025/07/25 11:34:30: チャンネル「chiba」の 1 クライアントに送信: play-announcement
+call-system  | 2025/07/25 11:34:30: アナウンス送信 -> チャンネル「chiba」: 整理券 285, 診察室 3
+call-system  | 2025/07/25 11:50:37: チャンネル「chiba」の 1 クライアントに送信: play-announcement
+call-system  | 2025/07/25 11:50:37: アナウンス送信 -> チャンネル「chiba」: 整理券 252, 診察室 2
+call-system  | 2025/07/25 11:50:52: チャンネル「chiba」の 1 クライアントに送信: play-announcement
+call-system  | 2025/07/25 11:50:52: アナウンス送信 -> チャンネル「chiba」: 整理券 206, 診察室 3
+call-system  | 2025/07/25 12:05:37: チャンネル「chiba」の 1 クライアントに送信: play-announcement
+call-system  | 2025/07/25 12:05:37: アナウンス送信 -> チャンネル「chiba」: 整理券 214, 診察室 2
+call-system  | 2025/07/25 12:12:30: チャンネル「chiba」の 1 クライアントに送信: play-announcement
+call-system  | 2025/07/25 12:12:30: アナウンス送信 -> チャンネル「chiba」: 整理券 228, 診察室 1
+call-system  | 2025/07/25 12:16:25: チャンネル「chiba」の 1 クライアントに送信: play-announcement
+call-system  | 2025/07/25 12:16:25: アナウンス送信 -> チャンネル「chiba」: 整理券 227, 診察室 2
+call-system  | 2025/07/25 12:16:28: チャンネル「chiba」の 1 クライアントに送信: play-announcement
+call-system  | 2025/07/25 12:16:28: アナウンス送信 -> チャンネル「chiba」: 整理券 214, 診察室 1
+call-system  | 2025/07/25 12:16:36: チャンネル「chiba」の 1 クライアントに送信: play-announcement
+call-system  | 2025/07/25 12:16:36: アナウンス送信 -> チャンネル「chiba」: 整理券 214, 診察室 1
+call-system  | 2025/07/25 12:19:35: チャンネル「chiba」の 1 クライアントに送信: play-announcement
+call-system  | 2025/07/25 12:19:35: アナウンス送信 -> チャンネル「chiba」: 整理券 274, 診察室 3
+call-system  | 2025/07/25 12:23:03: チャンネル「chiba」の 1 クライアントに送信: play-announcement
+call-system  | 2025/07/25 12:23:03: アナウンス送信 -> チャンネル「chiba」: 整理券 227, 診察室 1
+call-system  | 2025/07/25 12:26:36: チャンネル「chiba」の 1 クライアントに送信: play-announcement
+call-system  | 2025/07/25 12:26:36: アナウンス送信 -> チャンネル「chiba」: 整理券 241, 診察室 1
+call-system  | 2025/07/25 12:41:37: チャンネル「chiba」の 1 クライアントに送信: play-announcement
+call-system  | 2025/07/25 12:41:37: アナウンス送信 -> チャンネル「chiba」: 整理券 263, 診察室 3
+call-system  | 2025/07/25 12:43:59: チャンネル「chiba」の 1 クライアントに送信: play-announcement
+call-system  | 2025/07/25 12:43:59: アナウンス送信 -> チャンネル「chiba」: 整理券 297, 診察室 1
+call-system  | 2025/07/25 12:49:14: チャンネル「chiba」の 1 クライアントに送信: play-announcement
+call-system  | 2025/07/25 12:49:14: アナウンス送信 -> チャンネル「chiba」: 整理券 287, 診察室 1
+call-system  | 2025/07/25 12:56:44: チャンネル「chiba」の 1 クライアントに送信: play-announcement
+call-system  | 2025/07/25 12:56:44: アナウンス送信 -> チャンネル「chiba」: 整理券 230, 診察室 1
+call-system  | 2025/07/25 12:59:25: チャンネル「chiba」の 1 クライアントに送信: play-announcement
+call-system  | 2025/07/25 12:59:25: アナウンス送信 -> チャンネル「chiba」: 整理券 299, 診察室 1
+call-system  | 2025/07/25 13:23:46: チャンネル「chiba」の 1 クライアントに送信: play-announcement
+call-system  | 2025/07/25 13:23:46: アナウンス送信 -> チャンネル「chiba」: 整理券 213, 診察室 3
+call-system  | 2025/07/25 13:44:16: チャンネル「chiba」の 1 クライアントに送信: play-announcement
+call-system  | 2025/07/25 13:44:16: アナウンス送信 -> チャンネル「chiba」: 整理券 290, 診察室 3
+call-system  | 2025/07/25 14:01:31: チャンネル「chiba」の 1 クライアントに送信: play-announcement
+call-system  | 2025/07/25 14:01:31: アナウンス送信 -> チャンネル「chiba」: 整理券 260, 診察室 1
+call-system  | 2025/07/25 14:10:40: チャンネル「chiba」の 1 クライアントに送信: play-announcement
+call-system  | 2025/07/25 14:10:40: アナウンス送信 -> チャンネル「chiba」: 整理券 231, 診察室 1
+call-system  | 2025/07/25 14:24:45: チャンネル「chiba」の 1 クライアントに送信: play-announcement
+call-system  | 2025/07/25 14:24:45: アナウンス送信 -> チャンネル「chiba」: 整理券 204, 診察室 1
+call-system  | 2025/07/25 14:34:22: チャンネル「chiba」の 1 クライアントに送信: play-announcement
+call-system  | 2025/07/25 14:34:22: アナウンス送信 -> チャンネル「chiba」: 整理券 258, 診察室 1
+call-system  | 2025/07/25 15:05:44: チャンネル「chiba」の 1 クライアントに送信: play-announcement
+call-system  | 2025/07/25 15:05:44: アナウンス送信 -> チャンネル「chiba」: 整理券 208, 診察室 1
+call-system  | 2025/07/25 15:06:35: チャンネル「chiba」の 1 クライアントに送信: play-announcement
+call-system  | 2025/07/25 15:06:35: アナウンス送信 -> チャンネル「chiba」: 整理券 290, 診察室 3
+call-system  | 2025/07/25 15:20:17: クライアント AkbnCJYXezAxfsoTmhyWiPwVtGOaSJdR が接続終了 (チャンネル: chiba)。残り 0 クライアント。
+call-system  | 2025/07/25 15:31:16: イベント送信試行: チャンネル「chiba」にアクティブなクライアントがいません。
+call-system  | 2025/07/25 15:31:16: アナウンス送信 -> チャンネル「chiba」: 整理券 204, 診察室 1
+call-system  | 2025/07/25 15:31:19: イベント送信試行: チャンネル「chiba」にアクティブなクライアントがいません。
+call-system  | 2025/07/25 15:31:19: アナウンス送信 -> チャンネル「chiba」: 整理券 204, 診察室 1
+call-system  | 2025/07/25 15:31:22: イベント送信試行: チャンネル「chiba」にアクティブなクライアントがいません。
+call-system  | 2025/07/25 15:31:22: アナウンス送信 -> チャンネル「chiba」: 整理券 204, 診察室 1
+call-system  | 2025/07/25 15:31:26: イベント送信試行: チャンネル「chiba」にアクティブなクライアントがいません。
+call-system  | 2025/07/25 15:31:26: アナウンス送信 -> チャンネル「chiba」: 整理券 204, 診察室 1
+call-system  | 2025/07/25 15:31:33: イベント送信試行: チャンネル「chiba」にアクティブなクライアントがいません。
+call-system  | 2025/07/25 15:31:33: アナウンス送信 -> チャンネル「chiba」: 整理券 204, 診察室 1
+call-system  | 2025/07/25 15:35:31: イベント送信試行: チャンネル「chiba」にアクティブなクライアントがいません。
+call-system  | 2025/07/25 15:35:31: アナウンス送信 -> チャンネル「chiba」: 整理券 275, 診察室 1
+call-system  | 2025/07/25 15:41:44: クライアント AkbnCJYXezAxfsoTmhyWiPwVtGOaSJdR がチャンネル「chiba」接続開始
+call-system  | 2025/07/25 15:41:44: クライアント AkbnCJYXezAxfsoTmhyWiPwVtGOaSJdR が接続開始 (チャンネル: chiba)。現在 1 クライアント。
+call-system  | 2025/07/25 15:42:00: チャンネル「chiba」の 1 クライアントに送信: play-announcement
+call-system  | 2025/07/25 15:42:00: アナウンス送信 -> チャンネル「chiba」: 整理券 2, 診察室 1
+call-system  | 2025/07/25 15:43:15: チャンネル「chiba」の 1 クライアントに送信: play-announcement
+call-system  | 2025/07/25 15:43:15: アナウンス送信 -> チャンネル「chiba」: 整理券 216, 診察室 1
+call-system  | 2025/07/25 16:26:01: チャンネル「chiba」の 1 クライアントに送信: play-announcement
+call-system  | 2025/07/25 16:26:01: アナウンス送信 -> チャンネル「chiba」: 整理券 288, 診察室 3
+call-system  | 2025/07/25 16:27:37: チャンネル「chiba」の 1 クライアントに送信: play-announcement
+call-system  | 2025/07/25 16:27:37: アナウンス送信 -> チャンネル「chiba」: 整理券 249, 診察室 1
+call-system  | 2025/07/25 16:30:58: チャンネル「chiba」の 1 クライアントに送信: play-announcement
+call-system  | 2025/07/25 16:30:58: アナウンス送信 -> チャンネル「chiba」: 整理券 250, 診察室 4
+call-system  | 2025/07/25 16:41:11: チャンネル「chiba」の 1 クライアントに送信: play-announcement
+call-system  | 2025/07/25 16:41:11: アナウンス送信 -> チャンネル「chiba」: 整理券 240, 診察室 3
+call-system  | 2025/07/25 16:53:28: チャンネル「chiba」の 1 クライアントに送信: play-announcement
+call-system  | 2025/07/25 16:53:28: アナウンス送信 -> チャンネル「chiba」: 整理券 247, 診察室 3
+call-system  | 2025/07/25 16:53:51: チャンネル「chiba」の 1 クライアントに送信: play-announcement
+call-system  | 2025/07/25 16:53:51: アナウンス送信 -> チャンネル「chiba」: 整理券 240, 診察室 1
+call-system  | 2025/07/25 16:55:55: チャンネル「chiba」の 1 クライアントに送信: play-announcement
+call-system  | 2025/07/25 16:55:55: アナウンス送信 -> チャンネル「chiba」: 整理券 252, 診察室 1
+call-system  | 2025/07/25 16:59:07: チャンネル「chiba」の 1 クライアントに送信: play-announcement
+call-system  | 2025/07/25 16:59:07: アナウンス送信 -> チャンネル「chiba」: 整理券 264, 診察室 1
+call-system  | 2025/07/25 16:59:15: チャンネル「chiba」の 1 クライアントに送信: play-announcement
+call-system  | 2025/07/25 16:59:15: アナウンス送信 -> チャンネル「chiba」: 整理券 288, 診察室 3
+call-system  | 2025/07/25 17:05:59: チャンネル「chiba」の 1 クライアントに送信: play-announcement
+call-system  | 2025/07/25 17:05:59: アナウンス送信 -> チャンネル「chiba」: 整理券 264, 診察室 4
+call-system  | 2025/07/25 17:09:31: チャンネル「chiba」の 1 クライアントに送信: play-announcement
+call-system  | 2025/07/25 17:09:31: アナウンス送信 -> チャンネル「chiba」: 整理券 240, 診察室 4
+call-system  | 2025/07/25 17:19:52: チャンネル「chiba」の 1 クライアントに送信: play-announcement
+call-system  | 2025/07/25 17:19:52: アナウンス送信 -> チャンネル「chiba」: 整理券 227, 診察室 3
