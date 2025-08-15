@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>呼び出しシステム(受信側)</title>
+    <link rel="shortcut icon" href="/icons/favicon.ico" type="image/x-icon">
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon-180x180.webp" sizes="180x180">
+
+    <meta property="og:title" content="呼び出しシステム(受信側)" />
+    <meta property="og:description" content="送信側から受け取った整理券番号と診察室番号を合成音声で読み上げます。" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://call.y.medical41.tokyo/receiver" />
+    <meta property="og:image" content="https://call.y.medical41.tokyo/icons/call.png" />
+    <meta property="og:site_name" content="呼び出しシステム" />
+
+    <link rel="stylesheet" href="/css/receiver.css">
+</head>
+<body>
+    <header>
+        <a href="../" class="page-button sender-button">送信側</a>
+        <a href="#" class="page-button receiver-button current-page">受信側</a>
+    </header>
+
+    <h1>音声再生クライアント</h1>
+
+    <div id="controls">
+        <label for="channelSelect">チャンネル:</label>
+        <select id="channelSelect"></select>
+        <br>
+        <label for="channelPassword">パスワード:</label>
+        <input type="password" id="channelPassword">
+        <br>
+        <button id="subscribeButton">チャンネルに接続</button>
+        <button id="unsubscribeButton" disabled>接続解除</button>
+        <button id="refreshChannels" title="チャンネルリストを更新">更新</button>
+        
+    </div>
+    <div class="toggle-switch-container">
+        <input type="checkbox" id="silentAudioToggle">
+        <label for="silentAudioToggle">無音再生</label>
+        <span class="tooltip">ⓘ
+            <span class="tooltiptext">Bluetooth音声が途切れる場合に有効にします。WebAudio APIを使用した極小音（30Hz、音量0.1%）でBluetooth接続を維持します。</span>
+        </span>
+   </div>
+
+
+
+    <div id="status">初期化中...</div>
+    <div id="log"></div>
+
+    <footer>
+        <div class="credit-info">
+            <span class="info-icon" tabindex="0" aria-label="クレジット情報を表示">ⓘ</span>
+            <div class="tooltip" role="tooltip">
+                <strong>謝辞 (Acknowledgements)</strong>
+                <p>本プロジェクトでは、以下の素晴らしい音声合成ライブラリおよびキャラクターを使用させていただいております。</p>
+                <strong>VOICEVOX:</strong>
+                <p>
+                    四国めたん, ずんだもん, 春日部つむぎ, 雨晴はう, 波音リツ, 玄野武宏, 白上虎太郎, 青山龍星, 冥鳴ひまり, 九州そら, もち子(cv 明日葉よもぎ), 剣崎雌雄, WhiteCUL, 後鬼, No.7, ちび式じい, 櫻歌ミコ, 小夜/SAYO, ナースロボ＿タイプＴ, †聖騎士 紅桜†, 雀松朱司, 麒ヶ島宗麟, 春歌ナナ, 猫使アル, 猫使ビィ, 中国うさぎ, 栗田まろん, あいえるたん, 満別花丸, 琴詠ニア, Voidoll(CV:丹下桜), ぞん子, 中部つるぎ
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="/js/receiver.js"></script>
+</body>
+</html>

@@ -1,0 +1,349 @@
+
+/* モダンなスタイル */
+:root {
+    --base-bg: #ffffff; /* 背景色 (白) */
+    --text-color: #212529; /* 基本テキスト色 (濃いグレー) */
+    --border-color: #dee2e6; /* ボーダー色 (薄いグレー) */
+    --input-bg: #f8f9fa; /* 入力欄背景色 (ごく薄いグレー) */
+    --button-bg: var(--base-bg); /* ボタン背景色 */
+    --button-hover-bg: var(--text-color); /* ボタンホバー背景色 (黒) */
+    --button-text: var(--text-color); /* ボタンテキスト色 */
+    --button-hover-text: var(--base-bg); /* ボタンホバーテキスト色 (白) */
+    --selected-bg: #6c757d; /* 選択中ボタン背景色 (グレー) */
+    --selected-text: var(--base-bg); /* 選択中ボタンテキスト色 */
+    --success-color: #198754; /* 成功メッセージ色 (緑) */
+    --error-color: #dc3545; /* エラーメッセージ色 (赤) */
+    --primary-accent: #0d6efd; /* 必要に応じてアクセントカラー */
+
+    --border-radius-round: 50vh; /* 楕円形のための角丸 */
+    --border-radius-soft: 8px;  /* 少し丸めた角 */
+    --box-shadow-light: 0 2px 5px rgba(0, 0, 0, 0.08); /* 軽い影 */
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* モダンなフォント */
+    background-color: var(--base-bg);
+    color: var(--text-color);
+    padding: 25px;
+    line-height: 1.6;
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* 中央寄せにする場合 */
+}
+
+h1, h2, h3 {
+    color: var(--text-color);
+    margin-bottom: 1em;
+}
+h1 { font-size: 2rem; font-weight: 600; text-align: center; margin-bottom: 1.5em;}
+h2 { font-size: 1.5rem; font-weight: 500; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5em; }
+h3 { font-size: 1.25rem; font-weight: 500; }
+
+.container {
+    max-width: 600px; /* コンテンツの最大幅を設定 */
+    width: 100%;
+}
+
+.control-group {
+    margin-bottom: 25px;
+    border: 1px solid var(--border-color);
+    padding: 25px;
+    border-radius: var(--border-radius-soft);
+    background-color: var(--base-bg);
+    box-shadow: var(--box-shadow-light);
+}
+
+label {
+    display: inline-block;
+    width: 120px; /* 幅を固定 */
+    margin-bottom: 8px;
+    font-weight: 500;
+    vertical-align: middle; /* 要素の垂直中央揃え */
+}
+
+/* 入力欄 (input, select) スタイル */
+input[type="number"],
+input[type="password"],
+input[type="text"],
+select {
+    width: calc(100% - 150px); /* ラベル幅を考慮した幅 */
+    padding: 10px 18px; /* 上下左右のパディング */
+    margin-bottom: 15px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-round); /* 楕円形 */
+    background-color: var(--input-bg);
+    font-size: 1em;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    vertical-align: middle;
+}
+
+input[type="number"] {
+    font-size: 1.2em; /* 整理券番号は少し大きく */
+}
+
+/* フォーカス時のスタイル */
+input[type="number"]:focus,
+input[type="password"]:focus,
+input[type="text"]:focus,
+select:focus {
+    outline: none;
+    border-color: var(--primary-accent); /* アクセントカラーで縁取り */
+    box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.2); /* 薄い影 */
+}
+
+/* select の矢印調整 (ブラウザ互換性に注意) */
+select {
+    appearance: none; /* デフォルトの矢印を消す */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    background-size: 1em;
+    padding-right: 2.5rem; /* 矢印スペース確保 */
+}
+
+.input-group { /* ラベルと入力欄のグループ化 */
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+}
+.input-group label {
+    margin-bottom: 0; /* グループ内のマージン調整 */
+    margin-right: 10px;
+}
+.input-group input, .input-group select {
+    flex-grow: 1; /* 残りのスペースを埋める */
+    margin-bottom: 0;
+    width: auto; /* 明示的なwidthを解除 */
+}
+.input-group button { /* 更新ボタンなど */
+        margin-left: 10px;
+        flex-shrink: 0; /* 縮まないように */
+}
+
+
+/* ボタン スタイル */
+button {
+    padding: 10px 20px;
+    margin-right: 10px;
+    margin-bottom: 5px; /* ボタン間の隙間 */
+    cursor: pointer;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-round); /* 楕円形 */
+    background-color: var(--button-bg);
+    color: var(--button-text);
+    font-size: 1em;
+    font-weight: 500;
+    transition: transform 0.15s ease-out, background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease; /* アニメーション */
+    box-shadow: var(--box-shadow-light);
+}
+
+/* ボタンホバー時の揺れと色変化 */
+button:hover,.page-button:hover {
+    background-color: var(--button-hover-bg);
+    color: var(--button-hover-text);
+    border-color: var(--button-hover-bg);
+    transform: translateY(-2px) rotate(1deg); /* 上に少し移動して傾ける */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12); /* 影を少し濃く */
+}
+button:active,.page-button:active {
+    transform: translateY(0) rotate(0); /* クリック時は元に戻す */
+        box-shadow: var(--box-shadow-light);
+}
+
+/* 診察室ボタン */
+.room-buttons button {
+    min-width: 45px;
+    padding: 8px 12px;
+    margin: 4px;
+    border-radius: var(--border-radius-round); /* 楕円形 */
+}
+.room-buttons button.selected {
+    background-color: var(--selected-bg);
+    color: var(--selected-text);
+    font-weight: bold;
+    border-color: var(--selected-bg);
+    transform: none; /* 選択中は揺れない */
+    box-shadow: none;
+}
+.room-buttons button.selected:hover { /* 選択中のホバーは色を変えない */
+    background-color: var(--selected-bg);
+    color: var(--selected-text);
+        transform: none;
+        box-shadow: none;
+}
+
+
+/* ステータスメッセージ */
+#announcement-status, #create-channel-status {
+    margin-top: 15px;
+    font-weight: 500;
+    min-height: 1.2em;
+    padding: 8px 12px;
+    border-radius: var(--border-radius-soft);
+    display: inline-block; /* メッセージがあるときだけ表示 */
+}
+.success {
+    color: var(--success-color);
+    background-color: #d1e7dd; /* 薄い緑背景 */
+}
+.error {
+    color: var(--error-color);
+    background-color: #f8d7da; /* 薄い赤背景 */
+}
+
+/* チャンネル作成ダイアログ */
+#create-channel-dialog {
+    border: 1px solid var(--border-color);
+    padding: 25px;
+    margin-top: 20px;
+    background-color: var(--input-bg); /* 少し色を変える */
+    border-radius: var(--border-radius-soft);
+    box-shadow: var(--box-shadow-light);
+}
+#create-channel-dialog h3 {
+    margin-top: 0;
+    margin-bottom: 20px;
+}
+
+.hidden {
+    display: none;
+}
+
+/* レスポンシブ調整 */
+@media (max-width: 600px) {
+body { padding: 15px; }
+.control-group { padding: 15px; }
+label { width: 100%; display: block; /* スマホではラベルを上に */ margin-bottom: 5px;}
+input[type="number"],
+input[type="password"],
+input[type="text"],
+select {
+    width: 100%; /* スマホでは幅100% */
+    margin-bottom: 15px; /* 下のマージンを確保 */
+}
+    .input-group {
+    flex-direction: column; /* 縦並びにする */
+    align-items: stretch; /* 幅を揃える */
+    }
+    .input-group label { margin-right: 0; }
+    .input-group input, .input-group select { width: 100%; }
+    .input-group button { margin-left: 0; margin-top: 5px; width: auto;} /* 更新ボタンなど */
+
+    button { width: 100%; margin-right: 0; /* 幅いっぱいに */ }
+    .room-buttons button { width: auto; /* 診察室ボタンは幅自動 */}
+}
+
+
+
+
+header {
+    position: relative;
+    padding: 10px 20px;
+    width: 100%;           /* ★ ヘッダー幅を100%に */
+    box-sizing: border-box; /* ★ paddingを含めて幅100%に */
+    background-color: var(--base-bg); /* 必要に応じて背景色を設定 */
+    /* border-bottom: 1px solid var(--border-color); /* 必要に応じて境界線 */
+    /* ★ ヘッダーをフレックスアイテムとして扱い、中央寄せの影響を受けないようにする */
+    /* または、ヘッダーを body の flex レイアウトの外に出す構成も考えられます */
+    /* ここでは width: 100% で画面幅に広げます */
+}
+
+/* 受信側ボタンのスタイル */
+.receiver-button {
+    right: 20px;
+}
+
+.sender-button {
+    right: 120px;    
+}
+.page-button {
+    position: absolute; /* ヘッダーに対して絶対位置を指定 */
+    top: 10px;        /* 上からの距離（ヘッダーのpaddingに合わせて調整） */
+    padding: 8px 15px; /* ボタンの内側の余白 */
+    background-color: var(--button-bg);
+    color: var(--button-text);
+    /* background-color: #007bff; ボタンの背景色（例: 青） */
+    /* color: white;          文字色 */
+    text-decoration: none; /* リンクの下線を消す */
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-round);
+    cursor: pointer;       /* マウスカーソルをポインターにする */
+    font-size: 1em;
+    font-weight: 500;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12); /* 影を少し濃く */
+    transition: transform 0.15s ease-out, background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease; /* アニメーション */
+    box-shadow: var(--box-shadow-light); 
+}
+
+/* Tutorial Styles */
+#tutorialOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* Overlay color */
+    z-index: 9990; /* Below tooltip, above most content */
+    display: none; /* Hidden by default */
+}
+
+#tutorialTooltip {
+    position: absolute; 
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    z-index: 10000; /* On top of everything */
+    display: none; /* Hidden by default */
+    max-width: 350px;
+    font-size: 0.9em;
+    line-height: 1.6;
+}
+
+#tutorialTooltip p {
+    margin-top: 0;
+    margin-bottom: 15px;
+}
+
+#tutorialTooltip button {
+    margin-right: 8px;
+    padding: 8px 15px;
+    cursor: pointer;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background-color: #fff;
+}
+#tutorialTooltip button:hover {
+    background-color: #f0f0f0;
+}
+#tutorialTooltip button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Class to highlight the current tutorial element */
+.tutorial-highlight {
+    position: relative; /* Needed for z-index and proper spotlight effect */
+    z-index: 9995; /* Above overlay, below tooltip */
+    /* Spotlight effect: transparent hole with dark surroundings */
+    /* box-shadow: 0 0 0 2000px rgba(0,0,0,0.5); */ /* 元のスタイルをコメントアウト */
+    box-shadow: none; /* 確認のため、一時的にスポットライト効果を無効にします */
+    outline: 2px solid #007bff; /* Optional: adds a border to the element itself */
+    border-radius: 4px; /* Optional: rounds the corners of the highlight */
+    /* transition for smooth effect (optional) */
+    /* transition: outline 0.2s ease-in-out, box-shadow 0.2s ease-in-out; */
+}
+
+/* Ensure form elements are clickable when highlighted */
+.tutorial-highlight select,
+.tutorial-highlight input,
+.tutorial-highlight button,
+.tutorial-highlight a {
+    pointer-events: auto; /* Allow interaction with the highlighted element */
+}
+
+/* /home/m41/call-system/public/css/index.css の末尾に追加 */
+header .page-button.tutorial-highlight {
+    position: absolute !important; /* 元の position: absolute を強制 */
+}

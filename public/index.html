@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>呼び出しシステム(送信側)</title>
+    <link rel="shortcut icon" href="/icons/favicon.ico" type="image/x-icon">
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon-180x180.webp" sizes="180x180">
+
+    <meta property="og:title" content="呼び出しシステム(送信側)" />
+    <meta property="og:description" content="受信側のシステムへ整理券番号と診察室を送信します。" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://call.y.medical41.tokyo" />
+    <meta property="og:image" content="https://call.y.medical41.tokyo/icons/call.png" />
+    <meta property="og:site_name" content="呼び出しシステム" />
+
+    <link rel="stylesheet" href="/css/index.css">
+</head>
+<body>
+    <header>
+        <a href="#" class="page-button sender-button current-page">送信側</a>
+        <a href="receiver.html" class="page-button receiver-button">受信側</a>
+        <button id="tutorialButton" class="page-button" style="margin-left: 10px;">マニュアル</button>
+    </header>
+    <div class="container">
+        <h1>呼び出し操作</h1>
+
+        <div class="control-group">
+            <h2>アナウンス実行</h2>
+            <div class="input-group" id="channel-selection-group">
+                <label for="channelSelect">チャンネル:</label>
+                <select id="channelSelect" required></select>
+                <button id="refreshChannels" title="チャンネルリストを更新">更新</button>
+            </div>
+            <div class="input-group" id="password-input-group">
+                <label for="channelPassword">パスワード:</label>
+                <input type="password" id="channelPassword" required>
+            </div>
+            <div class="input-group" id="ticket-number-input-group">
+                <label for="ticketNumber">整理券番号:</label>
+                <input type="text" id="ticketNumber" inputmode="numeric" pattern="[0-9]*" required>
+            </div>
+            <button id="announceButton">アナウンス開始</button>
+            <div style="margin-bottom: 15px;">
+                 <label style="display: block; margin-bottom: 8px;">診察室番号:</label>
+                 <div id="roomButtons" class="room-buttons">
+                     </div>
+            </div>
+            <div id="announcement-status"></div>
+        </div>
+    </div>
+
+    
+
+    <div id="tutorialOverlay">
+        <div id="tutorialTooltip">
+            <p id="tutorialText"></p>
+            <button id="tutorialPrev" disabled>前へ</button>
+            <button id="tutorialNext">次へ</button>
+            <button id="tutorialEnd" style="float: right;">終了</button>
+        </div>
+    </div>
+
+    <script src="/js/index.js"></script>
+</body>
+</html>

@@ -1,0 +1,384 @@
+/* モダンなスタイル - 音声再生クライアント用 */
+:root {
+    --base-bg: #ffffff; /* 背景色 (白) */
+    --text-color: #212529; /* 基本テキスト色 (濃いグレー) */
+    --border-color: #dee2e6; /* ボーダー色 (薄いグレー) */
+    --input-bg: #f8f9fa; /* 入力欄背景色 (ごく薄いグレー) */
+    --button-bg: var(--base-bg); /* ボタン背景色 */
+    --button-hover-bg: var(--text-color); /* ボタンホバー背景色 (黒) */
+    --button-text: var(--text-color); /* ボタンテキスト色 */
+    --button-hover-text: var(--base-bg); /* ボタンホバーテキスト色 (白) */
+    --button-disabled-bg: #e9ecef; /* 無効ボタン背景色 */
+    --button-disabled-text: #adb5bd; /* 無効ボタンテキスト色 */
+    --button-disabled-border: var(--border-color); /* 無効ボタンボーダー色 */
+    --success-color: #198754; /* 成功メッセージ色 (緑) */
+    --error-color: #dc3545; /* エラーメッセージ色 (赤) */
+    --info-color: #0dcaf0; /* 情報メッセージ色 (水色系) */
+    --primary-accent: #0d6efd; /* 必要に応じてアクセントカラー */
+
+    --border-radius-round: 50vh; /* 楕円形のための角丸 */
+    --border-radius-soft: 8px;  /* 少し丸めた角 */
+    --box-shadow-light: 0 2px 5px rgba(0, 0, 0, 0.08); /* 軽い影 */
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* モダンなフォント */
+    background-color: var(--base-bg);
+    color: var(--text-color);
+    padding: 25px;
+    line-height: 1.6;
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* 中央寄せ */
+    min-height: 100vh; /* 画面の高さいっぱいに広げる */
+}
+
+.container { /* コンテンツをラップする想定 */
+    max-width: 700px; /* 幅を少し広めに */
+    width: 100%;
+    background-color: var(--base-bg);
+    padding: 30px;
+    border-radius: var(--border-radius-soft);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); /* 少し目立つ影 */
+}
+
+h1 {
+    color: var(--text-color);
+    margin-bottom: 1.5em;
+    font-size: 2rem;
+    font-weight: 600;
+    text-align: center;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 0.6em;
+}
+
+/* コントロールエリア */
+#controls {
+    display: flex;
+    flex-wrap: wrap; /* 要素が多ければ折り返す */
+    gap: 15px; /* 要素間の隙間 */
+    align-items: center; /* 要素を垂直中央揃え */
+    margin-bottom: 25px;
+    padding: 20px;
+    background-color: var(--input-bg); /* 背景を少し変える */
+    border-radius: var(--border-radius-soft);
+}
+
+/* ラベル */
+label {
+    display: inline-block;
+    margin-right: 5px; /* 入力欄との隙間 */
+    font-weight: 500;
+    flex-shrink: 0; /* 縮まないように */
+}
+
+/* 入力欄 (select, input) スタイル */
+#controls select,
+#controls input[type="password"] {
+    padding: 10px 18px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-round); /* 楕円形 */
+    background-color: var(--base-bg); /* コントロールエリア背景と区別 */
+    font-size: 1em;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    flex-grow: 1; /* 空きスペースを埋めるように伸びる */
+    min-width: 150px; /* 最小幅確保 */
+}
+
+/* フォーカス時のスタイル */
+#controls select:focus,
+#controls input[type="password"]:focus {
+    outline: none;
+    border-color: var(--primary-accent);
+    box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.2);
+}
+
+/* select の矢印調整 */
+#controls select {
+   appearance: none;
+   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3E%3C/svg%3E");
+   background-repeat: no-repeat;
+   background-position: right 1rem center;
+   background-size: 1em;
+   padding-right: 2.5rem;
+}
+
+/* ボタン スタイル */
+#controls button {
+    padding: 10px 20px;
+    cursor: pointer;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-round); /* 楕円形 */
+    background-color: var(--button-bg);
+    color: var(--button-text);
+    font-size: 1em;
+    font-weight: 500;
+    transition: transform 0.15s ease-out, background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    box-shadow: var(--box-shadow-light);
+    flex-shrink: 0; /* 縮まないように */
+}
+
+/* ボタンホバー時の揺れと色変化 */
+#controls button:not(:disabled):hover {
+    background-color: var(--button-hover-bg);
+    color: var(--button-hover-text);
+    border-color: var(--button-hover-bg);
+    transform: translateY(-2px) rotate(1deg);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
+}
+#controls button:not(:disabled):active {
+    transform: translateY(0) rotate(0);
+    box-shadow: var(--box-shadow-light);
+}
+
+/* 無効状態のボタン */
+#controls button:disabled {
+    background-color: var(--button-disabled-bg);
+    color: var(--button-disabled-text);
+    border-color: var(--button-disabled-border);
+    cursor: not-allowed;
+    box-shadow: none;
+}
+/* 更新ボタンの見た目を少し変える（例） */
+#refreshChannels {
+    padding: 8px 12px; /* 少し小さく */
+    /* アイコンフォントを使うならここで設定 */
+}
+
+/* ステータス表示 */
+#status {
+    margin-top: 20px;
+    margin-bottom: 20px;
+    padding: 12px 18px;
+    border-radius: var(--border-radius-soft);
+    background-color: var(--input-bg);
+    border: 1px solid var(--border-color);
+    font-weight: 500;
+    text-align: center;
+    min-height: 1.6em; /* 高さを確保 */
+    width: 100%; /* 幅いっぱい */
+    box-sizing: border-box; /* paddingを含めて幅100% */
+}
+/* ステータスの種類に応じたスタイル（JS側でクラスを付与する想定） */
+#status.success { background-color: #d1e7dd; color: var(--success-color); border-color: #badbcc; }
+#status.error { background-color: #f8d7da; color: var(--error-color); border-color: #f5c2c7; }
+#status.connecting { background-color: #cff4fc; color: #055160; border-color: #b6effb; } /* 接続中など */
+#status.disconnected { background-color: #e2e3e5; color: #41464b; border-color: #d3d6d8; } /* 切断 */
+
+
+/* ログ表示エリア */
+#log {
+    margin-top: 20px;
+    padding: 15px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-soft);
+    background-color: #f8f9fa; /* ログエリアの背景 */
+    min-height: 100px; /* 最低限の高さを確保 */
+    max-height: 300px; /* 最大高さを設定 */
+    overflow-y: auto; /* 内容がはみ出たらスクロール */
+    width: 100%;
+    box-sizing: border-box;
+    font-size: 0.9em;
+    line-height: 1.5;
+    color: #495057; /* 少し薄めの文字色 */
+}
+#log div { /* ログの各行 */
+    padding: 4px 0;
+    border-bottom: 1px dotted var(--border-color); /* 区切り線 */
+}
+#log div:last-child {
+    border-bottom: none; /* 最後の行の線は消す */
+}
+
+/* レスポンシブ調整 */
+@media (max-width: 768px) {
+    body { padding: 15px; }
+    .container { padding: 20px; }
+    h1 { font-size: 1.8rem; }
+    #controls { flex-direction: column; align-items: stretch; gap: 10px; padding: 15px; }
+    #controls label { margin-right: 0; margin-bottom: 3px; } /* ラベルを上に */
+    #controls select,
+    #controls input[type="password"] { width: 100%; box-sizing: border-box; min-width: 0;}
+    #controls button { width: 100%; margin-top: 5px; } /* ボタンも幅いっぱい */
+}
+
+header {
+    position: relative;
+    padding: 10px 20px;
+    width: 100%;           /* ★ ヘッダー幅を100%に */
+    box-sizing: border-box; /* ★ paddingを含めて幅100%に */
+    background-color: var(--base-bg); /* 必要に応じて背景色を設定 */
+    /* border-bottom: 1px solid var(--border-color); /* 必要に応じて境界線 */
+    /* ★ ヘッダーをフレックスアイテムとして扱い、中央寄せの影響を受けないようにする */
+    /* または、ヘッダーを body の flex レイアウトの外に出す構成も考えられます */
+    /* ここでは width: 100% で画面幅に広げます */
+}
+
+/* 受信側ボタンのスタイル */
+.receiver-button {
+    right: 20px;
+}
+
+.sender-button {
+    right: 120px;    
+}
+.page-button {
+    position: absolute; /* ヘッダーに対して絶対位置を指定 */
+    top: 10px;        /* 上からの距離（ヘッダーのpaddingに合わせて調整） */
+    padding: 8px 15px; /* ボタンの内側の余白 */
+    background-color: var(--button-bg);
+    color: var(--button-text);
+    /* background-color: #007bff; ボタンの背景色（例: 青） */
+    /* color: white;          文字色 */
+    text-decoration: none; /* リンクの下線を消す */
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-round);
+    cursor: pointer;       /* マウスカーソルをポインターにする */
+    font-size: 1em;
+    font-weight: 500;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12); /* 影を少し濃く */
+    transition: transform 0.15s ease-out, background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease; /* アニメーション */
+    box-shadow: var(--box-shadow-light); 
+}
+
+.page-button:hover {
+    background-color: var(--button-hover-bg);
+    color: var(--button-hover-text);
+    border-color: var(--button-hover-bg);
+    transform: translateY(-2px) rotate(1deg); /* 上に少し移動して傾ける */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12); /* 影を少し濃く */
+}
+.page-button:active {
+    transform: translateY(0) rotate(0); /* クリック時は元に戻す */
+        box-shadow: var(--box-shadow-light);
+}
+
+.controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+.toggle-switch-container {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background-color: #f8f8f8;
+    margin-left: 15px; /* 他のコントロールとの間隔 */
+}
+.toggle-switch-container label {
+    cursor: pointer;
+    user-select: none; /* テキスト選択を防ぐ */
+}
+#silentAudioToggle {
+     margin-right: 5px;
+     cursor: pointer;
+}
+.tooltip {
+    position: relative;
+    display: inline-block;
+    cursor: help;
+    color: #666;
+    font-size: 0.9em;
+    border-bottom: 1px dotted #666;
+}
+.tooltip .tooltiptext {
+    visibility: hidden;
+    width: 220px;
+    background-color: rgba(0, 0, 0, 0.8);
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px 10px;
+    position: absolute;
+    z-index: 1;
+    bottom: 125%;
+    left: 50%;
+    margin-left: -110px; /* widthの半分 */
+    opacity: 0;
+    transition: opacity 0.3s;
+    font-size: 0.85em;
+    white-space: normal; /* 必要なら改行 */
+}
+.tooltip:hover .tooltiptext {
+    visibility: visible;
+    opacity: 1;
+}
+
+/* クレジット表記用スタイル */
+footer {
+    position: fixed;
+    bottom: 10px;
+    right: 10px;
+    z-index: 100; /* 他の要素より手前に表示 */
+}
+
+.credit-info {
+    position: relative; /* ツールチップの位置決めの基準 */
+    display: inline-block;
+}
+
+.info-icon {
+    font-size: 24px;
+    cursor: help;
+    padding: 5px 8px; /* 少しパディングを調整 */
+    border-radius: 50%;
+    background-color: #f0f0f0;
+    color: #333;
+    display: inline-block;
+    line-height: 1;
+    user-select: none; /* アイコンのテキスト選択を防ぐ */
+    border: 1px solid #ccc;
+}
+
+.info-icon:hover,
+.info-icon:focus {
+    background-color: #e0e0e0;
+}
+
+.tooltip {
+    display: none; /* 初期状態では非表示 */
+    opacity: 0;
+    visibility: hidden;
+    position: absolute;
+    bottom: 100%; /* アイコンのすぐ上に表示 */
+    right: 0;      /* アイコンの右端に合わせる */
+    transform: translateY(-10px); /* アイコンとの間に少し隙間 */
+    background-color: #333;
+    color: #fff;
+    text-align: left;
+    padding: 15px;
+    border-radius: 6px;
+    z-index: 1; /* アイコンより手前、フッター内 */
+    width: 350px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    transition: opacity 0.2s ease-in-out, visibility 0.2s ease-in-out, transform 0.2s ease-in-out;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.info-icon:hover + .tooltip,
+.info-icon:focus + .tooltip {
+    display: block;
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(-15px); /* ホバー/フォーカス時にもう少し上に */
+}
+
+.tooltip strong {
+    font-weight: bold;
+    display: block;
+    margin-bottom: 8px;
+}
+
+.tooltip p {
+    margin-bottom: 8px;
+}
+.tooltip p:last-child {
+    margin-bottom: 0;
+}
+

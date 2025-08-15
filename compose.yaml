@@ -1,0 +1,39 @@
+services:
+  call-system:
+    container_name: call-system
+    build: .
+    restart: unless-stopped
+    environment:
+      TZ: Asia/Tokyo
+    env_file:
+      - .env
+    networks:
+      - app_network
+    ports:
+      - "3002:3002"
+    volumes:
+      - ./channels.json:/app/channels.json
+      - ./settings.json:/app/settings.json
+      - ./public:/app/public # publicディレクトリ全体をマウント（JSファイルの変更を反映）
+    depends_on:
+      - voicevox_engine
+  voicevox_engine:
+    image: voicevox/voicevox_engine:cpu-ubuntu20.04-latest
+    container_name: voicevox_engine
+    restart: unless-stopped
+    ports:
+      - "50021:50021"
+    networks:
+    - app_network
+    tty: true
+    deploy: # CPU・メモリ割り当てを追加
+      resources:
+        limits: # 上限値
+          cpus: '2.0'  # 例: 2 CPUコアまで使用可
+          memory: 4G   # 例: 4GBのメモリまで使用可
+        reservations: # 予約値 (最低限確保するリソース)
+          cpus: '1.0'  # 例: 1 CPUコアを予約
+          memory: 2G   # 例: 2GBのメモリを予約
+networks:
+  app_network:
+    driver: bridge
