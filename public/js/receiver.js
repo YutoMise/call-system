@@ -10,10 +10,7 @@ const silentAudioToggle = document.getElementById('silentAudioToggle');
 
 let isSpeaking = false; // アナウンス再生中フラグ
 let currentSubscribedChannel = null;
-<<<<<<< HEAD
 let currentChannelInfo = null; // チャンネル情報（voiceIdを含む）を保存
-=======
->>>>>>> 7f4a113 (Initial commit of existing project)
 let eventSource = null;
 let speechSynthesisInitialized = false;
 
@@ -22,14 +19,10 @@ let speechSynthesisInitialized = false;
 // const audioSegmentCache = new Map();
 let currentAnnouncementAbortController = null; // 現在のアナウンスを中断するためのコントローラー
 
-<<<<<<< HEAD
 // WebAudio API用の変数
 let audioContext = null;
 let silentOscillator = null;
 let silentGainNode = null;
-=======
-let silentAudio = null;
->>>>>>> 7f4a113 (Initial commit of existing project)
 let isSilentAudioPlaying = false;
 let silentAudioMonitorInterval = null;
 
@@ -56,11 +49,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // 保存された値がない場合(null)はデフォルトでオン、'false'の場合のみオフ
     silentAudioToggle.checked = (savedSilentAudioState === null || savedSilentAudioState === 'true');
 
-<<<<<<< HEAD
     // WebAudio APIの初期化（ユーザー操作後に行う）
 
-=======
->>>>>>> 7f4a113 (Initial commit of existing project)
     silentAudioToggle.addEventListener('change', () => {
         const isEnabled = silentAudioToggle.checked;
         localStorage.setItem('silentAudioEnabled', isEnabled);
@@ -75,11 +65,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-<<<<<<< HEAD
 
 
-=======
->>>>>>> 7f4a113 (Initial commit of existing project)
     // チャンネルリストが読み込まれた後に、保存されたチャンネルを選択する
     // 注意: チャンネルリストの読み込みが非同期の場合、
     //      読み込み完了後にこの選択処理を行う必要があります。
@@ -148,7 +135,6 @@ function populateChannelList(channelNames) { /* ... 前回のコードと同じ 
     if (channelNames.includes(currentSelection)) { channelSelect.value = currentSelection; }
 }
 
-<<<<<<< HEAD
 // チャンネル詳細情報を取得する関数
 async function fetchChannelDetails() {
     logMessage("チャンネル詳細情報を要求中...");
@@ -166,8 +152,6 @@ async function fetchChannelDetails() {
     }
 }
 
-=======
->>>>>>> 7f4a113 (Initial commit of existing project)
 async function fetchChannelList() {
      logMessage("チャンネルリストを要求中...");
      try {
@@ -372,7 +356,6 @@ subscribeButton.addEventListener('click', async () => {
         });
         logMessage(`接続成功: ${result.message}`);
         currentSubscribedChannel = channelName;
-<<<<<<< HEAD
 
         // チャンネル詳細情報を取得してvoiceIdを保存
         const channelDetails = await fetchChannelDetails();
@@ -384,8 +367,6 @@ subscribeButton.addEventListener('click', async () => {
             currentChannelInfo = { name: channelName, voiceId: 'voice1' }; // デフォルト
         }
 
-=======
->>>>>>> 7f4a113 (Initial commit of existing project)
         connectEventSource();
 
     } catch (error) {
@@ -412,10 +393,7 @@ unsubscribeButton.addEventListener('click', async () => {
          const result = await apiCall('/api/unsubscribe', { method: 'POST' });
          logMessage(`接続解除成功: ${result.message}`);
          currentSubscribedChannel = null;
-<<<<<<< HEAD
          currentChannelInfo = null; // チャンネル情報もクリア
-=======
->>>>>>> 7f4a113 (Initial commit of existing project)
          updateUIState('idle');
      } catch (error) {
          logMessage(`接続解除失敗: ${error.message}`);
@@ -428,7 +406,6 @@ unsubscribeButton.addEventListener('click', async () => {
 refreshChannelsBtn.addEventListener('click', fetchChannelList);
 
 // 無音再生用のデータURLを生成する関数
-<<<<<<< HEAD
 // WebAudio APIを使用した無音再生の初期化
 function initializeWebAudioContext() {
     if (!audioContext) {
@@ -494,115 +471,12 @@ function prepareSilentAudio() {
 }
 
 // WebAudio API無音再生の監視機能
-=======
-function createSilentAudioDataURL() {
-    // 1秒間の無音データを生成（44.1kHz、16bit、モノラル）
-    const sampleRate = 44100;
-    const duration = 1; // 1秒
-    const numSamples = sampleRate * duration;
-    const buffer = new ArrayBuffer(44 + numSamples * 2); // WAVヘッダー44バイト + データ
-    const view = new DataView(buffer);
-
-    // WAVヘッダーを書き込み
-    const writeString = (offset, string) => {
-        for (let i = 0; i < string.length; i++) {
-            view.setUint8(offset + i, string.charCodeAt(i));
-        }
-    };
-
-    writeString(0, 'RIFF');
-    view.setUint32(4, 36 + numSamples * 2, true);
-    writeString(8, 'WAVE');
-    writeString(12, 'fmt ');
-    view.setUint32(16, 16, true);
-    view.setUint16(20, 1, true);
-    view.setUint16(22, 1, true);
-    view.setUint32(24, sampleRate, true);
-    view.setUint32(28, sampleRate * 2, true);
-    view.setUint16(32, 2, true);
-    view.setUint16(34, 16, true);
-    writeString(36, 'data');
-    view.setUint32(40, numSamples * 2, true);
-
-    // データ部分は0で埋める（無音）
-    for (let i = 0; i < numSamples; i++) {
-        view.setInt16(44 + i * 2, 0, true);
-    }
-
-    const blob = new Blob([buffer], { type: 'audio/wav' });
-    return URL.createObjectURL(blob);
-}
-
-// 無音再生
-function createSilentAudio() {
-    if (!silentAudio) {
-        logMessage("無音再生用のAudioオブジェクトを作成します。");
-
-        // まずファイルベースの無音再生を試行
-        silentAudio = new Audio(SILENT_AUDIO_FILE_URL);
-        silentAudio.loop = true; // ループ再生
-        silentAudio.volume = 0.1; // Bluetoothスピーカーの電源切れ防止のため音量1（0.0-1.0の範囲）
-
-        // イベントリスナーを設定
-        silentAudio.addEventListener('play', () => {
-            logMessage("無音再生が開始/再開されました。");
-            isSilentAudioPlaying = true;
-            startSilentAudioMonitoring(); // 監視を開始
-        });
-
-        silentAudio.addEventListener('pause', () => {
-            logMessage(`無音再生がpauseされました。現在時刻: ${silentAudio.currentTime.toFixed(2)}`);
-            // 意図しないpauseの場合に再開を試みるロジック（必要に応じて）
-            if (isSilentAudioPlaying && silentAudioToggle.checked && currentSubscribedChannel) {
-                 logMessage("無音再生が一時停止しました。状態を確認します...");
-                 // 自動再開はループやブラウザの挙動に任せる場合が多い
-                 // 必要であれば setTimeout で再開を試みる
-            } else {
-                 logMessage("無音再生が停止されました。");
-                 isSilentAudioPlaying = false;
-                 stopSilentAudioMonitoring(); // 監視を停止
-            }
-        });
-
-        silentAudio.addEventListener('error', (e) => {
-             logMessage(`無音再生エラーが発生しました: ${e.message || '詳細不明'}`);
-             console.error("Silent audio playback error:", e);
-
-             // ファイルベースが失敗した場合、プログラム生成の無音データを試行
-             logMessage("プログラム生成の無音データで再試行します。");
-             try {
-                 const silentDataURL = createSilentAudioDataURL();
-                 silentAudio.src = silentDataURL;
-                 silentAudio.load();
-             } catch (fallbackError) {
-                 logMessage(`フォールバック無音再生も失敗しました: ${fallbackError.message}`);
-                 console.error("Fallback silent audio creation failed:", fallbackError);
-             }
-
-             isSilentAudioPlaying = false; // エラー時は再生中ではない
-        });
-
-        // ループが終了した場合の処理（念のため）
-        silentAudio.addEventListener('ended', () => {
-            if (isSilentAudioPlaying && silentAudioToggle.checked && currentSubscribedChannel) {
-                logMessage("無音再生ループが終了しました。再開を試みます。");
-                silentAudio.play().catch(err => {
-                    logMessage(`無音再生の再開に失敗: ${err.message}`);
-                });
-            }
-        });
-    }
-}
-
-// 無音再生の監視機能
->>>>>>> 7f4a113 (Initial commit of existing project)
 function startSilentAudioMonitoring() {
     if (silentAudioMonitorInterval) {
         clearInterval(silentAudioMonitorInterval);
     }
 
     silentAudioMonitorInterval = setInterval(() => {
-<<<<<<< HEAD
         if (silentAudioToggle.checked && currentSubscribedChannel) {
             if (audioContext && silentOscillator) {
                 const contextState = audioContext.state;
@@ -621,41 +495,6 @@ function startSilentAudioMonitoring() {
             }
         }
     }, 10000); // 10秒ごとにチェック（WebAudio APIは安定しているため間隔を長く）
-=======
-        if (silentAudio && silentAudioToggle.checked && currentSubscribedChannel) {
-            const isPaused = silentAudio.paused;
-            const currentTime = silentAudio.currentTime;
-            const duration = silentAudio.duration || 0;
-
-            // 詳細な状態ログ
-            logMessage(`無音再生監視: paused=${isPaused}, playing=${isSilentAudioPlaying}, time=${currentTime.toFixed(2)}/${duration.toFixed(2)}, volume=${silentAudio.volume}`);
-
-            // 再生が停止している場合は再開を試みる
-            if (isPaused && isSilentAudioPlaying) {
-                logMessage("無音再生が予期せず停止しました。再開を試みます。");
-                // フラグをリセットしてから再開
-                isSilentAudioPlaying = false;
-                silentAudio.play().catch(err => {
-                    logMessage(`無音再生の自動再開に失敗: ${err.message}`);
-                });
-            }
-
-            // フラグと実際の状態が一致しない場合の修正
-            if (!isPaused && !isSilentAudioPlaying) {
-                logMessage("無音再生フラグが実際の状態と不一致です。修正します。");
-                isSilentAudioPlaying = true;
-            }
-
-            // 現在時刻とdurationをチェック（ループが正常に動作しているか）
-            if (!isPaused && duration > 0) {
-                const progress = (currentTime / duration) * 100;
-                if (progress > 95) { // 95%以上再生されている場合
-                    logMessage(`無音再生進行状況: ${progress.toFixed(1)}% (ループ中)`);
-                }
-            }
-        }
-    }, 5000); // 5秒ごとにチェック
->>>>>>> 7f4a113 (Initial commit of existing project)
 }
 
 function stopSilentAudioMonitoring() {
@@ -667,16 +506,7 @@ function stopSilentAudioMonitoring() {
 }
 
 async function playSilentAudio() {
-<<<<<<< HEAD
     logMessage(`WebAudio無音再生試行: トグル=${silentAudioToggle.checked}, 再生中=${isSilentAudioPlaying}, チャンネル=${currentSubscribedChannel}, 初期化済=${speechSynthesisInitialized}`);
-=======
-    logMessage(`無音再生試行: トグル=${silentAudioToggle.checked}, 再生中=${isSilentAudioPlaying}, チャンネル=${currentSubscribedChannel}, 初期化済=${speechSynthesisInitialized}`);
-
-    // 現在のsilentAudioの状態もログ出力
-    if (silentAudio) {
-        logMessage(`現在の無音オーディオ状態: paused=${silentAudio.paused}, currentTime=${silentAudio.currentTime.toFixed(2)}, duration=${silentAudio.duration || 'unknown'}`);
-    }
->>>>>>> 7f4a113 (Initial commit of existing project)
 
     // トグルがオフ、または既に再生中、またはチャンネル未接続なら何もしない
     if (!silentAudioToggle.checked || isSilentAudioPlaying || !currentSubscribedChannel) {
@@ -690,7 +520,6 @@ async function playSilentAudio() {
         return;
     }
 
-<<<<<<< HEAD
     // WebAudio APIの準備
     if (!prepareSilentAudio()) {
         logMessage("WebAudio APIの準備に失敗しました。");
@@ -723,53 +552,11 @@ async function playSilentAudio() {
     } catch (error) {
         logMessage(`WebAudio無音再生の開始に失敗しました: ${error.message}`);
         console.error("Failed to start WebAudio silent audio:", error);
-=======
-    createSilentAudio(); // Audioオブジェクトがなければ作成
-
-    logMessage("無音再生の開始を試みます...");
-    try {
-        // 再生前に現在時刻をリセット
-        if (silentAudio.currentTime > 0) {
-            silentAudio.currentTime = 0;
-            logMessage("無音再生の再生位置をリセットしました。");
-        }
-
-        // ブラウザの自動再生ポリシーに対応するため、複数回試行
-        let playAttempts = 0;
-        const maxAttempts = 3;
-
-        while (playAttempts < maxAttempts) {
-            try {
-                await silentAudio.play();
-                logMessage(`無音再生の開始に成功しました。音量: ${silentAudio.volume}, ループ: ${silentAudio.loop}`);
-                break; // 成功したらループを抜ける
-            } catch (playError) {
-                playAttempts++;
-                logMessage(`無音再生試行 ${playAttempts}/${maxAttempts} 失敗: ${playError.message}`);
-
-                if (playAttempts < maxAttempts) {
-                    // 少し待ってから再試行
-                    await new Promise(resolve => setTimeout(resolve, 500));
-                } else {
-                    throw playError; // 最後の試行も失敗したら例外を投げる
-                }
-            }
-        }
-
-        // isSilentAudioPlaying = true; // 'play'イベントで設定される
-    } catch (error) {
-        logMessage(`無音再生の開始に失敗しました: ${error.message}`);
-        console.error("Failed to start silent audio:", error);
->>>>>>> 7f4a113 (Initial commit of existing project)
         isSilentAudioPlaying = false;
 
         // 自動再生が拒否された場合のユーザー向けメッセージ
         if (error.name === 'NotAllowedError') {
-<<<<<<< HEAD
             logMessage("ブラウザの自動再生ポリシーによりWebAudio無音再生が拒否されました。ユーザー操作後に再試行されます。");
-=======
-            logMessage("ブラウザの自動再生ポリシーにより無音再生が拒否されました。ユーザー操作後に再試行されます。");
->>>>>>> 7f4a113 (Initial commit of existing project)
         }
     }
 }
@@ -777,7 +564,6 @@ async function playSilentAudio() {
 function stopSilentAudio() {
     stopSilentAudioMonitoring(); // 監視を停止
 
-<<<<<<< HEAD
     if (silentOscillator) {
         try {
             logMessage("WebAudio極小音再生を停止します。");
@@ -794,22 +580,6 @@ function stopSilentAudio() {
     isSilentAudioPlaying = false;
 
     logMessage(`WebAudio極小音再生停止完了。再生中=${isSilentAudioPlaying}`);
-=======
-    if (silentAudio) {
-        if (!silentAudio.paused) {
-            logMessage("無音再生を停止します。");
-            silentAudio.pause();
-            silentAudio.currentTime = 0; // 再生位置をリセット
-        }
-        // フラグを確実に更新
-        isSilentAudioPlaying = false;
-    } else {
-         // オブジェクトが存在しない場合
-         isSilentAudioPlaying = false; // 状態を確実に更新
-    }
-
-    logMessage(`無音再生停止完了。状態: paused=${silentAudio ? silentAudio.paused : 'N/A'}, playing=${isSilentAudioPlaying}`);
->>>>>>> 7f4a113 (Initial commit of existing project)
 }
 
 // 指定された音声ファイルを再生する関数
@@ -887,7 +657,6 @@ async function speakText(fullText, ticketNumber, roomNumber) {
     currentAnnouncementAbortController = new AbortController();
     const abortSignal = currentAnnouncementAbortController.signal;
 
-<<<<<<< HEAD
     // 現在のチャンネルのvoiceIdに基づいて音声ファイルのパスを組み立てる
     const voiceId = currentChannelInfo?.voiceId || 'voice1'; // デフォルトはvoice1
     const voiceBasePath = `${PREGENERATED_AUDIO_BASE_PATH}${voiceId}/`;
@@ -899,14 +668,6 @@ async function speakText(fullText, ticketNumber, roomNumber) {
 
     logMessage(`音声再生: voiceId=${voiceId}, チャンネル=${currentSubscribedChannel}`);
 
-=======
-    // 再生する音声ファイルのパスを組み立てる
-    const segmentsToPlay = [
-        `${PREGENERATED_AUDIO_BASE_PATH}ticket_${ticketNumber}.mp3`, // .wav から .mp3 (または .opus) に変更
-        `${PREGENERATED_AUDIO_BASE_PATH}room_${roomNumber}.mp3`   // .wav から .mp3 (または .opus) に変更
-    ];
-
->>>>>>> 7f4a113 (Initial commit of existing project)
     // 無音再生中なら一時停止
     let wasSilentPlaying = isSilentAudioPlaying && silentAudioToggle.checked && currentSubscribedChannel;
     if (wasSilentPlaying) {

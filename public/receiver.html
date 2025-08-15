@@ -40,9 +40,11 @@
         <input type="checkbox" id="silentAudioToggle">
         <label for="silentAudioToggle">無音再生</label>
         <span class="tooltip">ⓘ
-            <span class="tooltiptext">Bluetooth音声が途切れる場合に有効にします。接続ボタンを押すとバックグラウンドで無音再生を開始します。</span>
+            <span class="tooltiptext">Bluetooth音声が途切れる場合に有効にします。WebAudio APIを使用した極小音（30Hz、音量0.1%）でBluetooth接続を維持します。</span>
         </span>
    </div>
+
+
 
     <div id="status">初期化中...</div>
     <div id="log"></div>

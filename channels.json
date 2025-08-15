@@ -1,22 +1,27 @@
 [
   {
     "name": "yaesu",
-    "password": "orca"
+    "password": "orca",
+    "voiceId": "voice1"
   },
   {
     "name": "chiba",
-    "password": "orca"
+    "password": "orca",
+    "voiceId": "voice1"
   },
   {
     "name": "familia",
-    "password": "orca"
+    "password": "orca",
+    "voiceId": "voice1"
   },
   {
     "name": "marunouchi",
-    "password": "orca"
+    "password": "orca",
+    "voiceId": "voice1"
   },
   {
     "name": "tsic",
-    "password": "orca"
+    "password": "orca",
+    "voiceId": "voice1"
   }
 ]
