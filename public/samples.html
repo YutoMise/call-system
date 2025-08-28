@@ -379,7 +379,7 @@
                 japaneseSamples.push({
                     speakerId: i.toString(),
                     speakerName: speaker ? speaker.name : `スピーカー ${i}`,
-                    gender: 'unknown',  // 全て不明で統一
+                    gender: speaker ? speaker.gender : 'unknown',  // JSONから性別情報を使用
                     audioUrl: `/audio/samples/japanese/speaker_${i}/sample_call.mp3`
                 });
             }
