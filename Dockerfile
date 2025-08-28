@@ -41,7 +41,10 @@
     RUN npx javascript-obfuscator utils --output ./obfuscated_utils ${OBFUSCATOR_OPTIONS}
     RUN rm -rf utils
     RUN mv ./obfuscated_utils utils
-    
+
+    # apiフォルダは難読化しない（samples.js用）
+    # api フォルダはそのまま残す
+
     #-----------------------------------------
     # Stage 2: ランナー - 実行環境
     #-----------------------------------------

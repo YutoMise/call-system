@@ -9,19 +9,142 @@ const path = require('node:path');
 const ffmpegPath = require('ffmpeg-static');
 const fetch = require('node-fetch');
 
-const VOICEVOX_API_URL = 'http://localhost:50021'; // .env またはデフォルト
-const OUTPUT_DIR = path.join(__dirname, '../public/audio/pregenerated2');
+const VOICEVOX_API_URL = process.env.VOICEVOX_URL || 'http://localhost:50021';
+const OUTPUT_BASE_DIR = path.join(__dirname, '../public/audio/pregenerated');
 const TARGET_FORMAT = 'mp3'; // 'mp3' または 'opus'
 const FFMPEG_BITRATE = '96k'; // ファイルサイズを考慮して少し下げる (例: 96k)
+const SPEAKERS_FILE_PATH = path.join(__dirname, '../data/voicevox-speakers.json');
 
-// .env から設定を読み込む (デフォルト値も設定)
-const DEFAULT_SPEAKER_ID = parseInt(process.env.DEFAULT_VOICEVOX_SPEAKER_ID, 10) || 1;
-const DEFAULT_PITCH = parseFloat(process.env.DEFAULT_VOICEVOX_PITCH) || 0.0;
-const DEFAULT_SPEED = parseFloat(process.env.DEFAULT_VOICEVOX_SPEED) || 1.0;
+// ファイルから話者一覧を読み込む関数
+function loadSpeakersFromFile() {
+    try {
+        if (fs.existsSync(SPEAKERS_FILE_PATH)) {
+            const data = fs.readFileSync(SPEAKERS_FILE_PATH, 'utf8');
+            const speakers = JSON.parse(data);
+            console.log(`話者一覧をファイルから読み込みました: ${speakers.length}件`);
+            return speakers;
+        } else {
+            console.warn(`話者一覧ファイルが見つかりません: ${SPEAKERS_FILE_PATH}`);
+            return null;
+        }
+    } catch (error) {
+        console.warn(`話者一覧ファイルの読み込みに失敗しました: ${error.message}`);
+        return null;
+    }
+}
 
-// 保存先ディレクトリが存在しない場合は作成
-if (!fs.existsSync(OUTPUT_DIR)) {
-    fs.mkdirSync(OUTPUT_DIR, { recursive: true });
+// Voicevoxエンジンから話者一覧を取得する関数
+async function fetchVoicevoxSpeakers() {
+    // まずファイルから読み込みを試行
+    const fileSpeakers = loadSpeakersFromFile();
+    if (fileSpeakers) {
+        return fileSpeakers;
+    }
+
+    // ファイルから読み込めない場合はAPIから取得
+    try {
+        console.log(`Voicevox話者一覧をAPIから取得中: ${VOICEVOX_API_URL}/speakers`);
+        const response = await fetch(`${VOICEVOX_API_URL}/speakers`);
+
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+
+        const speakers = await response.json();
+        const speakerList = [];
+
+        // 話者データを整理（各話者の各スタイルを個別のエントリとして展開）
+        speakers.forEach(speaker => {
+            speaker.styles.forEach(style => {
+                speakerList.push({
+                    id: style.id,
+                    name: `${speaker.name}（${style.name}）`
+                });
+            });
+        });
+
+        // IDでソート
+        speakerList.sort((a, b) => a.id - b.id);
+
+        console.log(`話者一覧をAPIから取得完了: ${speakerList.length}件`);
+
+        // 取得した話者一覧をファイルに保存
+        try {
+            const dataDir = path.dirname(SPEAKERS_FILE_PATH);
+            if (!fs.existsSync(dataDir)) {
+                fs.mkdirSync(dataDir, { recursive: true });
+            }
+            fs.writeFileSync(SPEAKERS_FILE_PATH, JSON.stringify(speakerList, null, 2), 'utf8');
+            console.log(`話者一覧をファイルに保存しました: ${SPEAKERS_FILE_PATH}`);
+        } catch (saveError) {
+            console.warn(`話者一覧の保存に失敗しました: ${saveError.message}`);
+        }
+
+        return speakerList;
+
+    } catch (error) {
+        console.warn(`Voicevox話者一覧のAPI取得に失敗しました: ${error.message}`);
+        console.warn('フォールバック: 基本的な話者一覧を使用します');
+
+        // 最終フォールバック用の基本的な話者一覧
+        return [
+            { id: 0, name: "四国めたん（ノーマル）" },
+            { id: 1, name: "ずんだもん（ノーマル）" },
+            { id: 2, name: "四国めたん（あまあま）" },
+            { id: 3, name: "ずんだもん（あまあま）" },
+            { id: 4, name: "四国めたん（ツンツン）" },
+            { id: 5, name: "ずんだもん（ツンツン）" },
+            { id: 6, name: "四国めたん（セクシー）" },
+            { id: 7, name: "ずんだもん（セクシー）" },
+            { id: 8, name: "春日部つむぎ（ノーマル）" },
+            { id: 9, name: "波音リツ（ノーマル）" },
+            { id: 10, name: "雨晴はう（ノーマル）" },
+            { id: 11, name: "玄野武宏（ノーマル）" },
+            { id: 12, name: "白上虎太郎（ふつう）" },
+            { id: 13, name: "青山龍星（ノーマル）" },
+            { id: 14, name: "冥鳴ひまり（ノーマル）" },
+            { id: 15, name: "九州そら（ノーマル）" }
+        ];
+    }
+}
+
+// ヘルプ表示関数（ファイルから話者一覧を取得）
+async function showHelp() {
+    console.log(`
+音声ファイル生成スクリプト
+
+使用方法:
+  node generate-audio.js [オプション] [開始番号] [終了番号]
+
+オプション:
+  --voice-id <id>     音声ID（フォルダ名）[デフォルト: voice1]
+  --speaker-id <id>   VoicevoxスピーカーID [デフォルト: 1]
+  --pitch <value>     ピッチ（-0.15〜0.15）[デフォルト: 0.0]
+  --speed <value>     速度（0.5〜2.0）[デフォルト: 1.0]
+  --help, -h          このヘルプを表示
+
+例:
+  node generate-audio.js --voice-id voice2 --speaker-id 8 --pitch 0.1 --speed 1.2 1 100
+  node generate-audio.js --help
+
+話者一覧の更新:
+  node scripts/update-speakers.js
+`);
+
+    console.log('利用可能なVoicevoxスピーカー:');
+    try {
+        const speakers = await fetchVoicevoxSpeakers();
+        speakers.forEach(s => {
+            console.log(`  ${s.id.toString().padStart(3)}: ${s.name}`);
+        });
+
+        if (speakers.length > 16) {
+            console.log(`\n※ 話者一覧を最新に更新するには: node scripts/update-speakers.js`);
+        }
+    } catch (error) {
+        console.error('話者一覧の取得に失敗しました:', error.message);
+    }
+    console.log('');
 }
 
 /**
@@ -32,7 +155,7 @@ if (!fs.existsSync(OUTPUT_DIR)) {
  * @param {number} pitch ピッチ.
  * @param {number} speed スピード.
  */
-async function fetchAndSaveAudio(text, baseFilename, speakerId, pitch, speed) {
+async function fetchAndSaveAudio(text, baseFilename, speakerId, pitch, speed, outputDir) {
     const wavFilename = `${baseFilename}.wav`;
     const targetFilename = `${baseFilename}.${TARGET_FORMAT}`;
     console.log(`音声生成開始: "${text}" (Speaker: ${speakerId}, Pitch: ${pitch}, Speed: ${speed}) -> ${targetFilename}`);
@@ -78,8 +201,8 @@ async function fetchAndSaveAudio(text, baseFilename, speakerId, pitch, speed) {
         }
 
         const audioBuffer = await synthesisResponse.arrayBuffer();
-        const wavFilePath = path.join(OUTPUT_DIR, wavFilename);
-        const targetFilePath = path.join(OUTPUT_DIR, targetFilename);
+        const wavFilePath = path.join(outputDir, wavFilename);
+        const targetFilePath = path.join(outputDir, targetFilename);
 
         fs.writeFileSync(wavFilePath, Buffer.from(audioBuffer));
         console.log(`WAV保存完了: ${wavFilename}`);
@@ -103,78 +226,179 @@ async function fetchAndSaveAudio(text, baseFilename, speakerId, pitch, speed) {
 }
 
 /**
- * 指定された範囲の音声ファイルをすべて生成するメイン関数
+ * 指定された設定で音声ファイルを生成するメイン関数
  */
-async function generateAllAudioFiles(ticketStart, ticketEnd) {
+async function generateAllAudioFiles(voiceId, speakerId, pitch, speed, ticketStart, ticketEnd) {
     console.log("音声ファイルの事前生成を開始します...");
-    console.log(`保存先ディレクトリ: ${OUTPUT_DIR}`);
-    console.log(`使用する設定: SpeakerID=${DEFAULT_SPEAKER_ID}, Pitch=${DEFAULT_PITCH}, Speed=${DEFAULT_SPEED}`);
+    console.log(`保存先ディレクトリ: ${OUTPUT_BASE_DIR}/${voiceId}`);
+    console.log(`音声設定: voiceId=${voiceId}, speakerId=${speakerId}, pitch=${pitch}, speed=${speed}`);
     console.log(`整理券番号の生成範囲: ${ticketStart} から ${ticketEnd}`);
 
-    // 「呼び出し番号 X番のかた」 (1から1000まで)
+    // 保存先ディレクトリを作成
+    const outputDir = path.join(OUTPUT_BASE_DIR, voiceId);
+    if (!fs.existsSync(outputDir)) {
+        fs.mkdirSync(outputDir, { recursive: true });
+        console.log(`ディレクトリを作成しました: ${outputDir}`);
+    }
+
+    // 「呼び出し番号 X番のかた」 (指定範囲)
     for (let i = ticketStart; i <= ticketEnd; i++) {
-        // 途中で止まっても再開しやすいように、既にファイルが存在する場合はスキップ
         const baseTicketFilename = `ticket_${i}`;
         const targetTicketFilename = `${baseTicketFilename}.${TARGET_FORMAT}`;
-        if (fs.existsSync(path.join(OUTPUT_DIR, targetTicketFilename))) {
-            console.log(`スキップ (既存): ${targetTicketFilename}`);
+        if (fs.existsSync(path.join(outputDir, targetTicketFilename))) {
+            console.log(`スキップ (既存): ${voiceId}/${targetTicketFilename}`);
             continue;
         }
         await fetchAndSaveAudio(
             `呼び出し番号 ${i}番のかた`,
             baseTicketFilename,
-            DEFAULT_SPEAKER_ID,
-            DEFAULT_PITCH,
-            DEFAULT_SPEED
+            speakerId,
+            pitch,
+            speed,
+            outputDir
         );
-        await new Promise(resolve => setTimeout(resolve, 200)); // APIへの負荷軽減のため少し待機
+        await new Promise(resolve => setTimeout(resolve, 200)); // APIへの負荷軽減
     }
 
     // 「Y番診察室へお越しください。」 (1から7まで)
-    // こちらは範囲指定の対象外とするか、別途引数を設けるかですが、今回は固定とします。
     for (let i = 1; i <= 7; i++) {
         const baseRoomFilename = `room_${i}`;
         const targetRoomFilename = `${baseRoomFilename}.${TARGET_FORMAT}`;
-        if (fs.existsSync(path.join(OUTPUT_DIR, targetRoomFilename))) {
-            console.log(`スキップ (既存): ${targetRoomFilename}`);
+        if (fs.existsSync(path.join(outputDir, targetRoomFilename))) {
+            console.log(`スキップ (既存): ${voiceId}/${targetRoomFilename}`);
             continue;
         }
         await fetchAndSaveAudio(
             `${i}番診察室へお越しください。`,
             baseRoomFilename,
-            DEFAULT_SPEAKER_ID,
-            DEFAULT_PITCH,
-            DEFAULT_SPEED
+            speakerId,
+            pitch,
+            speed,
+            outputDir
         );
         await new Promise(resolve => setTimeout(resolve, 200)); // APIへの負荷軽減
     }
 
-    console.log("すべての音声ファイルの事前生成が完了しました。");
+    console.log(`音声ファイルの生成が完了しました: ${voiceId}`);
 }
 
-// コマンドライン引数から整理券番号の範囲を取得
-let ticketGenerationStart = 1;
-let ticketGenerationEnd = 1000; // デフォルトの範囲
+// コマンドライン引数の解析
+async function parseArguments() {
+    const args = process.argv.slice(2);
 
-if (process.argv.length >= 3) { // 第1引数 (開始番号)
-    const startArg = parseInt(process.argv[2], 10);
-    if (!isNaN(startArg) && startArg > 0) {
-        ticketGenerationStart = startArg;
-    } else {
-        console.warn(`無効な開始番号: "${process.argv[2]}"。デフォルトの ${ticketGenerationStart} を使用します。`);
+    // ヘルプ表示チェック
+    if (args.includes('--help') || args.includes('-h')) {
+        await showHelp();
+        process.exit(0);
+    }
+
+    // デフォルト値
+    let voiceId = 'voice1';
+    let speakerId = 1;
+    let pitch = 0.0;
+    let speed = 1.0;
+    let ticketStart = 1;
+    let ticketEnd = 1000;
+
+    // オプション解析
+    const numbers = [];
+    for (let i = 0; i < args.length; i++) {
+        switch (args[i]) {
+            case '--voice-id':
+                if (i + 1 < args.length) {
+                    voiceId = args[++i];
+                } else {
+                    console.error('エラー: --voice-id には値が必要です');
+                    process.exit(1);
+                }
+                break;
+            case '--speaker-id':
+                if (i + 1 < args.length) {
+                    const value = parseInt(args[++i], 10);
+                    if (!isNaN(value) && value >= 0) {
+                        speakerId = value;
+                    } else {
+                        console.error('エラー: --speaker-id には0以上の整数を指定してください');
+                        process.exit(1);
+                    }
+                } else {
+                    console.error('エラー: --speaker-id には値が必要です');
+                    process.exit(1);
+                }
+                break;
+            case '--pitch':
+                if (i + 1 < args.length) {
+                    const value = parseFloat(args[++i]);
+                    if (!isNaN(value) && value >= -0.15 && value <= 0.15) {
+                        pitch = value;
+                    } else {
+                        console.error('エラー: --pitch には-0.15から0.15の範囲の値を指定してください');
+                        process.exit(1);
+                    }
+                } else {
+                    console.error('エラー: --pitch には値が必要です');
+                    process.exit(1);
+                }
+                break;
+            case '--speed':
+                if (i + 1 < args.length) {
+                    const value = parseFloat(args[++i]);
+                    if (!isNaN(value) && value >= 0.5 && value <= 2.0) {
+                        speed = value;
+                    } else {
+                        console.error('エラー: --speed には0.5から2.0の範囲の値を指定してください');
+                        process.exit(1);
+                    }
+                } else {
+                    console.error('エラー: --speed には値が必要です');
+                    process.exit(1);
+                }
+                break;
+            default:
+                // オプションでない場合は番号として解析
+                if (!args[i].startsWith('--')) {
+                    const value = parseInt(args[i], 10);
+                    if (!isNaN(value) && value > 0) {
+                        numbers.push(value);
+                    }
+                }
+                break;
+        }
+    }
+
+    // 番号の設定
+    if (numbers.length >= 1) {
+        ticketStart = numbers[0];
+    }
+    if (numbers.length >= 2) {
+        ticketEnd = numbers[1];
+    }
+
+    // 終了番号が開始番号より小さい場合の調整
+    if (ticketEnd < ticketStart) {
+        ticketEnd = ticketStart;
+    }
+
+    return { voiceId, speakerId, pitch, speed, ticketStart, ticketEnd };
+}
+
+// スクリプト実行（非同期対応）
+async function main() {
+    try {
+        const config = await parseArguments();
+        await generateAllAudioFiles(
+            config.voiceId,
+            config.speakerId,
+            config.pitch,
+            config.speed,
+            config.ticketStart,
+            config.ticketEnd
+        );
+    } catch (err) {
+        console.error("音声生成スクリプト全体でエラーが発生しました:", err);
+        process.exit(1);
     }
 }
-if (process.argv.length >= 4) { // 第2引数 (終了番号)
-    const endArg = parseInt(process.argv[3], 10);
-    if (!isNaN(endArg) && endArg >= ticketGenerationStart) {
-        ticketGenerationEnd = endArg;
-    } else {
-        console.warn(`無効な終了番号: "${process.argv[3]}"。${ticketGenerationStart} 以上の値を指定してください。デフォルトの ${Math.max(ticketGenerationEnd, ticketGenerationStart)} を使用します。`);
-        ticketGenerationEnd = Math.max(ticketGenerationEnd, ticketGenerationStart); // 開始番号より小さくならないように調整
-    }
-}
 
-// スクリプト実行
-generateAllAudioFiles(ticketGenerationStart, ticketGenerationEnd).catch(err => {
-    console.error("音声生成スクリプト全体でエラーが発生しました:", err);
-});
+// メイン関数を実行
+main();

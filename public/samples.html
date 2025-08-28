@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>音声サンプル - 患者呼び出しシステム</title>
+    <link rel="shortcut icon" href="/icons/favicon.ico" type="image/x-icon">
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon-180x180.webp" sizes="180x180">
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -32,6 +34,123 @@
             font-weight: bold;
             color: #1976d2;
         }
+
+        .tabs {
+            display: flex;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin: 20px 0;
+            overflow: hidden;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 15px 20px;
+            text-align: center;
+            cursor: pointer;
+            background: #f5f5f5;
+            border: none;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .tab.active {
+            background: #1976d2;
+            color: white;
+        }
+
+        .tab:hover:not(.active) {
+            background: #e0e0e0;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .sub-tabs {
+            display: flex;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin: 15px 0;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .sub-tab {
+            flex: 1;
+            padding: 12px 15px;
+            text-align: center;
+            cursor: pointer;
+            background: #f8f9fa;
+            border: none;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s;
+            color: #666;
+        }
+
+        .sub-tab.active {
+            background: #fff;
+            color: #1976d2;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .sub-tab:hover:not(.active) {
+            background: #e9ecef;
+        }
+
+        .sub-tab-content {
+            display: none;
+        }
+
+        .sub-tab-content.active {
+            display: block;
+        }
+
+        /* 性別による色分け */
+        .sample-card.female {
+            border-left: 4px solid #e91e63;
+        }
+
+        .sample-card.male {
+            border-left: 4px solid #2196f3;
+        }
+
+        .sample-card.unknown {
+            border-left: 4px solid #4caf50;
+        }
+
+        .gender-indicator {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-left: 8px;
+        }
+
+        .gender-indicator.female {
+            background: #fce4ec;
+            color: #c2185b;
+        }
+
+        .gender-indicator.male {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+
+        .gender-indicator.unknown {
+            background: #e8f5e8;
+            color: #388e3c;
+        }
+
+
         
         .samples-grid {
             display: grid;
@@ -108,51 +227,239 @@
         <h1>音声サンプル</h1>
         <p>患者呼び出しシステム - 各スピーカーの音声比較</p>
     </div>
-    
-    <div class="sample-text">
-        「呼び出し番号 12番のかた、1番診察室へお越しください。」
+
+    <div class="tabs">
+        <button class="tab active" onclick="switchTab('japanese')">
+            日本語 (VOICEVOX)
+        </button>
+        <button class="tab" onclick="switchTab('english')">
+            English (Kokoro TTS)
+        </button>
     </div>
-    
-    <div id="samplesContainer" class="loading">
-        サンプル音声を読み込み中...
+
+    <div id="japanese-content" class="tab-content active">
+        <div class="sample-text">
+            「呼び出し番号 12番のかた、1番診察室へお越しください。」
+        </div>
+        <div id="japaneseSamplesContainer" class="loading">
+            日本語サンプル音声を読み込み中...
+        </div>
+    </div>
+
+    <div id="english-content" class="tab-content">
+        <div class="sample-text">
+            "Ticket number 12, please come to examination room 1."
+        </div>
+
+        <div class="sub-tabs">
+            <button class="sub-tab active" onclick="switchSubTab('af')">
+                American Female (AF)
+            </button>
+            <button class="sub-tab" onclick="switchSubTab('am')">
+                American Male (AM)
+            </button>
+            <button class="sub-tab" onclick="switchSubTab('bf')">
+                British Female (BF)
+            </button>
+            <button class="sub-tab" onclick="switchSubTab('bm')">
+                British Male (BM)
+            </button>
+        </div>
+
+        <div id="af-content" class="sub-tab-content active">
+            <div id="afSamplesContainer" class="loading">
+                American Female音声を読み込み中...
+            </div>
+        </div>
+
+        <div id="am-content" class="sub-tab-content">
+            <div id="amSamplesContainer" class="loading">
+                American Male音声を読み込み中...
+            </div>
+        </div>
+
+        <div id="bf-content" class="sub-tab-content">
+            <div id="bfSamplesContainer" class="loading">
+                British Female音声を読み込み中...
+            </div>
+        </div>
+
+        <div id="bm-content" class="sub-tab-content">
+            <div id="bmSamplesContainer" class="loading">
+                British Male音声を読み込み中...
+            </div>
+        </div>
     </div>
 
     <script>
+        let currentTab = 'japanese';
+        let currentSubTab = 'af';
+
+        function switchTab(tabName) {
+            // タブボタンの状態を更新
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            // タブコンテンツの表示を切り替え
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.getElementById(tabName + '-content').classList.add('active');
+
+            currentTab = tabName;
+        }
+
+        function switchSubTab(subTabName) {
+            // サブタブボタンの状態を更新
+            document.querySelectorAll('.sub-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            // サブタブコンテンツの表示を切り替え
+            document.querySelectorAll('.sub-tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.getElementById(subTabName + '-content').classList.add('active');
+
+            currentSubTab = subTabName;
+        }
+
+
+
         async function loadSamples() {
+            // 日本語スピーカー情報を読み込み
+            let speakerData = {};
             try {
-                // サンプルディレクトリの内容を取得
-                const response = await fetch('/api/samples');
-                if (!response.ok) {
-                    throw new Error('サンプル一覧の取得に失敗しました');
+                const response = await fetch('/data/voicevox-speakers.json');
+                if (response.ok) {
+                    const speakers = await response.json();
+                    console.log('読み込んだスピーカーデータ:', speakers.length, '個');
+
+                    // 最初の5個のスピーカーデータを詳細ログ出力
+                    console.log('最初の5個のスピーカーデータ詳細:');
+                    speakers.slice(0, 5).forEach((speaker, index) => {
+                        console.log(`Speaker ${index}:`, {
+                            id: speaker.id,
+                            name: speaker.name,
+                            gender: speaker.gender,
+                            hasGenderField: speaker.hasOwnProperty('gender')
+                        });
+                    });
+
+                    speakers.forEach(speaker => {
+                        speakerData[speaker.id] = {
+                            name: speaker.name,
+                            gender: speaker.gender || 'unknown'  // JSONから性別を読み込み、なければ不明
+                        };
+                    });
+                    console.log('処理後のspeakerData:', Object.keys(speakerData).length, '個');
+
+                    // 処理後のspeakerDataの最初の5個も確認
+                    console.log('処理後のspeakerDataの最初の5個:');
+                    Object.keys(speakerData).slice(0, 5).forEach(id => {
+                        console.log(`SpeakerData[${id}]:`, speakerData[id]);
+                    });
+                } else {
+                    console.error('スピーカーデータの取得に失敗:', response.status);
                 }
-                
-                const samples = await response.json();
-                displaySamples(samples);
-                
             } catch (error) {
-                console.error('サンプル読み込みエラー:', error);
-                displayNoSamples();
+                console.error('スピーカーデータの読み込みに失敗:', error);
+            }
+
+            // 日本語サンプル（データファイルベース）
+            const japaneseSamples = [];
+            for (let i = 0; i <= 112; i++) {
+                const speaker = speakerData[i];
+                if (i < 5) {  // 最初の5個をデバッグ出力
+                    console.log(`Speaker ${i}:`, speaker);
+                }
+                japaneseSamples.push({
+                    speakerId: i.toString(),
+                    speakerName: speaker ? speaker.name : `スピーカー ${i}`,
+                    gender: 'unknown',  // 全て不明で統一
+                    audioUrl: `/audio/samples/japanese/speaker_${i}/sample_call.mp3`
+                });
+            }
+            console.log('生成したjapaneseSamples:', japaneseSamples.length, '個');
+
+            // 英語サンプル（静的リスト）
+            const englishVoices = [
+                'af_alloy', 'af_aoede', 'af_bella', 'af_heart', 'af_jadzia', 'af_jessica', 'af_kore', 'af_nicole', 'af_nova', 'af_river', 'af_sarah', 'af_sky', 'af_v0', 'af_v0bella', 'af_v0irulan', 'af_v0nicole', 'af_v0sarah', 'af_v0sky',
+                'am_adam', 'am_echo', 'am_eric', 'am_fenrir', 'am_liam', 'am_michael', 'am_onyx', 'am_puck', 'am_santa', 'am_v0adam', 'am_v0gurney', 'am_v0michael',
+                'bf_alice', 'bf_emma', 'bf_lily', 'bf_v0emma', 'bf_v0isabella',
+                'bm_daniel', 'bm_fable', 'bm_george', 'bm_lewis', 'bm_v0george', 'bm_v0lewis'
+            ];
+
+            const englishSamples = englishVoices.map(voiceId => ({
+                voiceId: voiceId,
+                voiceName: voiceId.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+                audioUrl: `/audio/samples/english/${voiceId}/sample_call.mp3`
+            }));
+
+            displayJapaneseSamples(japaneseSamples);
+            displayEnglishSamples(englishSamples);
+        }
+
+        // 性別表示用の関数（読み取り専用）
+        function getGenderDisplay(gender) {
+            switch(gender) {
+                case 'female':
+                    return '女性';
+                case 'male':
+                    return '男性';
+                default:
+                    return '不明';
             }
         }
         
-        function displaySamples(samples) {
-            const container = document.getElementById('samplesContainer');
-            
+        // 性別を判定する関数
+        function getGender(speakerName, voiceId) {
+            if (speakerName) {
+                const name = speakerName.toLowerCase();
+                // 日本語話者の性別判定（一般的な名前パターン）
+                if (name.includes('女') || name.includes('female') ||
+                    name.includes('春日部つむぎ') || name.includes('雨晴はう') ||
+                    name.includes('波音リツ') || name.includes('玄野武宏') === false) {
+                    // より詳細な判定が必要な場合はここで追加
+                }
+            }
+
+            if (voiceId) {
+                const id = voiceId.toLowerCase();
+                if (id.startsWith('af_') || id.startsWith('bf_')) return 'female';
+                if (id.startsWith('am_') || id.startsWith('bm_')) return 'male';
+            }
+
+            return 'unknown';
+        }
+
+        function displayJapaneseSamples(samples) {
+            const container = document.getElementById('japaneseSamplesContainer');
+
             if (samples.length === 0) {
-                displayNoSamples();
+                displayNoSamples('japanese');
                 return;
             }
-            
+
             container.innerHTML = '';
             container.className = 'samples-grid';
-            
+
             samples.forEach(sample => {
+                const gender = sample.gender || 'unknown';
+                const genderText = gender === 'female' ? '女性' : gender === 'male' ? '男性' : '不明';
+
                 const card = document.createElement('div');
-                card.className = 'sample-card';
-                
+                card.className = `sample-card ${gender}`;
+
                 card.innerHTML = `
                     <div class="speaker-info">
-                        <div class="speaker-id">Speaker ID: ${sample.speakerId}</div>
+                        <div class="speaker-id">
+                            Speaker ID: ${sample.speakerId}
+                            <span class="gender-indicator ${gender}">${genderText}</span>
+                        </div>
                         <div class="speaker-name">${sample.speakerName}</div>
                     </div>
                     <audio class="audio-player" controls>
@@ -161,21 +468,97 @@
                         お使いのブラウザは音声再生に対応していません。
                     </audio>
                 `;
-                
+
                 container.appendChild(card);
             });
         }
+
+        function displayEnglishSamples(samples) {
+            if (samples.length === 0) {
+                displayNoSamples('english');
+                return;
+            }
+
+            // 音声を種類別に分類
+            const categorized = {
+                af: samples.filter(s => s.voiceId.startsWith('af_')),
+                am: samples.filter(s => s.voiceId.startsWith('am_')),
+                bf: samples.filter(s => s.voiceId.startsWith('bf_')),
+                bm: samples.filter(s => s.voiceId.startsWith('bm_'))
+            };
+
+            // 各カテゴリーのサンプルを表示
+            Object.keys(categorized).forEach(category => {
+                const container = document.getElementById(category + 'SamplesContainer');
+                const categoryData = categorized[category];
+
+                if (categoryData.length === 0) {
+                    container.className = 'no-samples';
+                    container.innerHTML = `<p>このカテゴリーにはサンプルがありません</p>`;
+                    return;
+                }
+
+                container.innerHTML = '';
+                container.className = 'samples-grid';
+
+                categoryData.forEach(sample => {
+                    const gender = getGender(null, sample.voiceId);
+                    const genderText = gender === 'female' ? 'Female' : gender === 'male' ? 'Male' : 'Unknown';
+
+                    // カテゴリー名を表示用に変換
+                    const categoryName = {
+                        'af': 'American Female',
+                        'am': 'American Male',
+                        'bf': 'British Female',
+                        'bm': 'British Male'
+                    }[category];
+
+                    const card = document.createElement('div');
+                    card.className = `sample-card ${gender}`;
+
+                    card.innerHTML = `
+                        <div class="speaker-info">
+                            <div class="speaker-id">
+                                Voice: ${sample.voiceId}
+                                <span class="gender-indicator ${gender}">${genderText}</span>
+                            </div>
+                            <div class="speaker-name">${sample.voiceName}</div>
+                            <div style="font-size: 12px; color: #666; margin-top: 4px;">
+                                ${categoryName}
+                            </div>
+                        </div>
+                        <audio class="audio-player" controls>
+                            <source src="${sample.audioUrl}" type="audio/wav">
+                            <source src="${sample.audioUrl.replace('.wav', '.mp3')}" type="audio/mpeg">
+                            Your browser does not support audio playback.
+                        </audio>
+                    `;
+
+                    container.appendChild(card);
+                });
+            });
+        }
         
-        function displayNoSamples() {
-            const container = document.getElementById('samplesContainer');
+        function displayNoSamples(type) {
+            const containerId = type === 'japanese' ? 'japaneseSamplesContainer' : 'englishSamplesContainer';
+            const container = document.getElementById(containerId);
             container.className = 'no-samples';
-            container.innerHTML = `
-                <h3>サンプル音声がありません</h3>
-                <p>以下のコマンドでサンプル音声を生成してください：</p>
-                <code>npm run generate-samples -- --speaker-ids 1,8,10</code>
-                <br>
-                <code>npm run generate-samples -- --all</code>
-            `;
+
+            if (type === 'japanese') {
+                container.innerHTML = `
+                    <h3>日本語サンプル音声がありません</h3>
+                    <p>以下のコマンドでサンプル音声を生成してください：</p>
+                    <code>node scripts/migrate-samples.js</code><br>
+                    <code>node scripts/generate-samples.js --speaker-ids 1,8,10</code>
+                `;
+            } else {
+                container.innerHTML = `
+                    <h3>英語サンプル音声がありません</h3>
+                    <p>以下のコマンドでサンプル音声を生成してください：</p>
+                    <code>docker compose up -d kokoro_tts</code><br>
+                    <code>node scripts/generate-samples-kokoro.js --voices af_bella,af_sarah</code>
+                `;
+            }
         }
         
         // ページ読み込み時にサンプルを読み込み

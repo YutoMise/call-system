@@ -23,5 +23,10 @@
     "name": "tsic",
     "password": "orca",
     "voiceId": "voice1"
+  },
+  {
+    "name": "demo",
+    "password": "orca",
+    "voiceId": "voice2"
   }
 ]
