@@ -1,0 +1,68 @@
+# Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Logs
+logs/
+*.log
+logs_*.txt
+cron_docker.log
+
+# Data and temporary files
+data/
+cookies.txt
+
+# Build outputs (C/Assembly backend)
+asm-backend/bin/
+asm-backend/obj/
+*.o
+*.exe
+*.out
+*.app
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Docker
+.dockerignore
+
+# Temporary files
+*.tmp
+*.temp
+
+# Audio files (if generated)
+public/audio/
+*.wav
+*.mp3
+
+# Settings that might contain sensitive data
+settings.json
+channels.json

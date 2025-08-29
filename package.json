@@ -1,0 +1,27 @@
+{
+  "name": "call-system",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "crypto": "^1.0.1",
+    "date-utils": "^1.2.21",
+    "dotenv": "^16.5.0",
+    "express": "^5.1.0",
+    "express-session": "^1.18.1",
+    "node-fetch": "^2.7.0",
+    "play-sound": "^1.1.6"
+  },
+  "devDependencies": {
+    "ffmpeg-static": "^5.2.0",
+    "javascript-obfuscator": "^4.1.1",
+    "terser": "^5.39.0"
+  }
+}
