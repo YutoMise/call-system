@@ -3,7 +3,7 @@ const fs = require('node:fs');
 require('dotenv').config({ path: require('node:path').join(__dirname, '../.env') }); // .envファイルを読み込む
 const { execSync } = require('node:child_process'); // ffmpeg実行のため追加
 const path = require('node:path');
-const ffmpegPath = require('ffmpeg-static');
+const ffmpegPath = 'ffmpeg'; // システムのffmpegを使用
 const fetch = require('node-fetch');
 
 const KOKORO_TTS_API_URL = process.env.KOKORO_TTS_URL || 'http://localhost:8880';
@@ -236,6 +236,22 @@ async function generateAllAudioFiles(voiceId, voice, speed, ticketStart, ticketE
             outputDir
         );
         await new Promise(resolve => setTimeout(resolve, 200)); // APIへの負荷軽減
+    }
+
+    // 「Please come to the reception desk.」
+    const baseReceptionFilename = `room_reception`;
+    const targetReceptionFilename = `${baseReceptionFilename}.${TARGET_FORMAT}`;
+    if (!fs.existsSync(path.join(outputDir, targetReceptionFilename))) {
+        await fetchAndSaveAudio(
+            `please come to the reception desk.`,
+            baseReceptionFilename,
+            voice,
+            speed,
+            outputDir
+        );
+        await new Promise(resolve => setTimeout(resolve, 200)); // APIへの負荷軽減
+    } else {
+        console.log(`スキップ (既存): ${voiceId}/${targetReceptionFilename}`);
     }
 
     console.log(`Kokoro TTS音声ファイルの生成が完了しました: ${voiceId}`);

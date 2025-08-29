@@ -15,20 +15,50 @@ const createChannelButton = document.getElementById('createChannelButton');
 const createChannelStatus = document.getElementById('create-channel-status');
 let selectedRoom = null;
 
-// --- 診察室ボタン生成 (変更なし) ---
-for (let i = 1; i <= 7; i++) {
-    const button = document.createElement('button');
-    button.textContent = i; button.dataset.room = i;
-    button.addEventListener('click', (event) => {
-        event.preventDefault(); // フォーム送信を防ぐ
-        // すべてのボタンから 'selected' クラスを削除
-        roomButtonsContainer.querySelectorAll('button').forEach(btn => btn.classList.remove('selected'));
-        // クリックされたボタンに 'selected' クラスを追加
-        button.classList.add('selected');
-        selectedRoom = button.dataset.room; // 選択された部屋番号を保持
-    });
-    roomButtonsContainer.appendChild(button);
+// --- 診察室ボタン生成（動的） ---
+let currentChannelConfig = null;
+
+// 診察室ボタンを動的に生成する関数
+function generateRoomButtons(roomCount, useReception) {
+    // 既存のボタンをクリア
+    roomButtonsContainer.innerHTML = '';
+    selectedRoom = null;
+
+    // 診察室ボタンを生成
+    for (let i = 1; i <= roomCount; i++) {
+        const button = document.createElement('button');
+        button.textContent = i;
+        button.dataset.room = i;
+        button.addEventListener('click', (event) => {
+            event.preventDefault(); // フォーム送信を防ぐ
+            // すべてのボタンから 'selected' クラスを削除
+            roomButtonsContainer.querySelectorAll('button').forEach(btn => btn.classList.remove('selected'));
+            // クリックされたボタンに 'selected' クラスを追加
+            button.classList.add('selected');
+            selectedRoom = button.dataset.room; // 選択された部屋番号を保持
+        });
+        roomButtonsContainer.appendChild(button);
+    }
+
+    // 受付ボタンを生成（useReceptionがtrueの場合のみ）
+    if (useReception) {
+        const receptionButton = document.createElement('button');
+        receptionButton.textContent = '受付';
+        receptionButton.dataset.room = 'reception';
+        receptionButton.addEventListener('click', (event) => {
+            event.preventDefault(); // フォーム送信を防ぐ
+            // すべてのボタンから 'selected' クラスを削除
+            roomButtonsContainer.querySelectorAll('button').forEach(btn => btn.classList.remove('selected'));
+            // クリックされたボタンに 'selected' クラスを追加
+            receptionButton.classList.add('selected');
+            selectedRoom = receptionButton.dataset.room; // 選択された部屋番号を保持
+        });
+        roomButtonsContainer.appendChild(receptionButton);
+    }
 }
+
+// デフォルトの診察室ボタンを生成（初期表示用）
+generateRoomButtons(7, true);
 
 document.addEventListener('DOMContentLoaded', () => {
     const channelSelect = document.getElementById('channelSelect');
@@ -283,6 +313,51 @@ function populateChannelList(channelNames) {
     }
 }
 
+// チャンネル詳細情報を取得する関数
+async function fetchChannelDetails() {
+    try {
+        const response = await fetch('/api/channel-details');
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        const channelDetails = await response.json();
+        return channelDetails;
+    } catch (error) {
+        console.error('チャンネル詳細情報取得エラー:', error.message);
+        return [];
+    }
+}
+
+// チャンネル選択時の処理
+async function onChannelChange() {
+    const selectedChannelName = channelSelect.value;
+    if (!selectedChannelName) {
+        // チャンネルが選択されていない場合はデフォルト設定
+        generateRoomButtons(7, true);
+        currentChannelConfig = null;
+        return;
+    }
+
+    try {
+        const channelDetails = await fetchChannelDetails();
+        const channelConfig = channelDetails.find(ch => ch.name === selectedChannelName);
+
+        if (channelConfig) {
+            currentChannelConfig = channelConfig;
+            generateRoomButtons(channelConfig.roomCount || 7, channelConfig.useReception !== false);
+        } else {
+            // 設定が見つからない場合はデフォルト設定
+            generateRoomButtons(7, true);
+            currentChannelConfig = null;
+        }
+    } catch (error) {
+        console.error('チャンネル設定取得エラー:', error);
+        // エラーの場合はデフォルト設定
+        generateRoomButtons(7, true);
+        currentChannelConfig = null;
+    }
+}
+
 async function fetchChannelList() {
     console.log("チャンネルリストを要求中...");
     announcementStatus.textContent = 'チャンネルリストを読込中...'; // ユーザーにフィードバック
@@ -298,7 +373,10 @@ async function fetchChannelList() {
     }
 }
 
-// --- UIイベントリスナー (変更なし) ---
+// --- UIイベントリスナー ---
+// チャンネル選択時のイベントリスナー
+channelSelect.addEventListener('change', onChannelChange);
+
 refreshChannelsBtn.addEventListener('click', (e) => {
         e.preventDefault(); // ボタンのデフォルト動作を防ぐ
         fetchChannelList();

@@ -418,7 +418,9 @@ app.get('/admin/channel/edit', (req, res) => {
 app.get('/api/channel-details', (req, res) => {
     const channelDetails = channels.map(channel => ({
         name: channel.name,
-        voiceId: channel.voiceId || 'voice1' // デフォルト値を設定
+        voiceId: channel.voiceId || 'voice1', // デフォルト値を設定
+        roomCount: channel.roomCount || 7, // デフォルト値を設定
+        useReception: channel.useReception !== false // デフォルト値を設定
     }));
     res.json(channelDetails);
 });
@@ -440,6 +442,20 @@ app.post('/admin/api/channels', requireAdminAuth, async (req, res) => {
         for (const channel of newChannels) {
             if (!channel.name || !channel.password) {
                 return res.status(400).json({ message: 'すべてのチャンネルにnameとpasswordが必要です。' });
+            }
+
+            // 診察室数のバリデーション
+            if (channel.roomCount !== undefined) {
+                const roomCount = parseInt(channel.roomCount);
+                if (isNaN(roomCount) || roomCount < 1 || roomCount > 10) {
+                    return res.status(400).json({ message: '診察室数は1-10の範囲で入力してください。' });
+                }
+                channel.roomCount = roomCount; // 数値に変換
+            }
+
+            // useReceptionのバリデーション
+            if (channel.useReception !== undefined && typeof channel.useReception !== 'boolean') {
+                return res.status(400).json({ message: '受付使用設定はboolean値である必要があります。' });
             }
         }
 

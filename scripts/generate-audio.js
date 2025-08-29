@@ -6,7 +6,7 @@ const path = require('node:path');
 // node-fetchのv3以降はESMのみサポートのため、package.jsonに "type": "module" を追加するか、
 // CommonJSで使えるv2系 (npm install node-fetch@2) をインストールしてください。
 // 以下は node-fetch v2 を想定した書き方です。
-const ffmpegPath = require('ffmpeg-static');
+const ffmpegPath = 'ffmpeg'; // システムのffmpegを使用
 const fetch = require('node-fetch');
 
 const VOICEVOX_API_URL = process.env.VOICEVOX_URL || 'http://localhost:50021';
@@ -277,6 +277,23 @@ async function generateAllAudioFiles(voiceId, speakerId, pitch, speed, ticketSta
             outputDir
         );
         await new Promise(resolve => setTimeout(resolve, 200)); // APIへの負荷軽減
+    }
+
+    // 「受付にお越しください。」
+    const baseReceptionFilename = `room_reception`;
+    const targetReceptionFilename = `${baseReceptionFilename}.${TARGET_FORMAT}`;
+    if (!fs.existsSync(path.join(outputDir, targetReceptionFilename))) {
+        await fetchAndSaveAudio(
+            `受付にお越しください。`,
+            baseReceptionFilename,
+            speakerId,
+            pitch,
+            speed,
+            outputDir
+        );
+        await new Promise(resolve => setTimeout(resolve, 200)); // APIへの負荷軽減
+    } else {
+        console.log(`スキップ (既存): ${voiceId}/${targetReceptionFilename}`);
     }
 
     console.log(`音声ファイルの生成が完了しました: ${voiceId}`);
