@@ -139,7 +139,7 @@ function populateChannelList(channelNames) { /* ... 前回のコードと同じ 
 async function fetchChannelDetails() {
     logMessage("チャンネル詳細情報を要求中...");
     try {
-        const response = await fetch('/admin/api/channels');
+        const response = await fetch('/api/channel-details');
         if (!response.ok) {
             throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }

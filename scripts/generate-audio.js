@@ -279,6 +279,23 @@ async function generateAllAudioFiles(voiceId, speakerId, pitch, speed, ticketSta
         await new Promise(resolve => setTimeout(resolve, 200)); // APIへの負荷軽減
     }
 
+    // 「受付にお越しください。」
+    const baseReceptionFilename = `room_reception`;
+    const targetReceptionFilename = `${baseReceptionFilename}.${TARGET_FORMAT}`;
+    if (!fs.existsSync(path.join(outputDir, targetReceptionFilename))) {
+        await fetchAndSaveAudio(
+            `受付にお越しください。`,
+            baseReceptionFilename,
+            speakerId,
+            pitch,
+            speed,
+            outputDir
+        );
+        await new Promise(resolve => setTimeout(resolve, 200)); // APIへの負荷軽減
+    } else {
+        console.log(`スキップ (既存): ${voiceId}/${targetReceptionFilename}`);
+    }
+
     console.log(`音声ファイルの生成が完了しました: ${voiceId}`);
 }
 

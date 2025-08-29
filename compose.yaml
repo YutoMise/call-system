@@ -14,9 +14,11 @@ services:
     volumes:
       - ./channels.json:/app/channels.json
       - ./settings.json:/app/settings.json
+      - ./data/voicevox-speakers.json:/app/data/voicevox-speakers.json # スピーカー性別情報を永続化
       - ./public:/app/public # publicディレクトリ全体をマウント（JSファイルの変更を反映）
     depends_on:
       - voicevox_engine
+      - kokoro_tts
   voicevox_engine:
     image: voicevox/voicevox_engine:cpu-ubuntu20.04-latest
     container_name: voicevox_engine
@@ -34,6 +36,23 @@ services:
         reservations: # 予約値 (最低限確保するリソース)
           cpus: '1.0'  # 例: 1 CPUコアを予約
           memory: 2G   # 例: 2GBのメモリを予約
+  kokoro_tts:
+    image: ghcr.io/remsky/kokoro-fastapi-cpu:latest
+    container_name: kokoro_tts
+    restart: unless-stopped
+    ports:
+      - "8880:8880"
+    networks:
+      - app_network
+    tty: true
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 4G
+        reservations:
+          cpus: '1.0'
+          memory: 2G
 networks:
   app_network:
     driver: bridge

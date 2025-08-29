@@ -6,8 +6,7 @@ const crypto = require('crypto');
 require('date-utils');
 require('dotenv').config();
 
-const settingsManager = require('./utils/settingsManager'); // 設定管理モジュール
-const voicevoxRouter = require('./routes/voicevox'); // Voicevox用ルーター
+
 
 const app = express();
 const PORT = 3002;
@@ -88,6 +87,52 @@ app.use(express.json());
 
 // 静的ファイル提供
 app.use(express.static(path.join(__dirname, 'public')));
+app.use('/data', express.static(path.join(__dirname, 'data')));
+
+// スピーカー性別更新API
+app.post('/api/update-speaker-gender', async (req, res) => {
+    try {
+        const { speakerId, gender } = req.body;
+
+        if (speakerId === undefined || speakerId === null || !gender || !['male', 'female', 'unknown'].includes(gender)) {
+            return res.status(400).json({ error: '無効なパラメータです' });
+        }
+
+        const speakersFilePath = path.join(__dirname, 'data/voicevox-speakers.json');
+
+        // 現在のスピーカーデータを読み込み
+        let speakers = [];
+        try {
+            const data = await fs.readFile(speakersFilePath, 'utf8');
+            speakers = JSON.parse(data);
+        } catch (error) {
+            console.error('スピーカーファイルの読み込みエラー:', error);
+            return res.status(500).json({ error: 'スピーカーファイルの読み込みに失敗しました' });
+        }
+
+        // 該当スピーカーを検索して性別を更新
+        const speaker = speakers.find(s => s.id === parseInt(speakerId));
+        if (!speaker) {
+            return res.status(404).json({ error: 'スピーカーが見つかりません' });
+        }
+
+        speaker.gender = gender;
+
+        // ファイルに書き戻し
+        try {
+            await fs.writeFile(speakersFilePath, JSON.stringify(speakers, null, 2), 'utf8');
+            console.log(`Speaker ${speakerId} の性別を ${gender} に更新しました`);
+            res.json({ success: true, speakerId, gender });
+        } catch (error) {
+            console.error('スピーカーファイルの書き込みエラー:', error);
+            res.status(500).json({ error: 'スピーカーファイルの更新に失敗しました' });
+        }
+
+    } catch (error) {
+        console.error('性別更新エラー:', error);
+        res.status(500).json({ error: '内部サーバーエラー' });
+    }
+});
 
 // サンプル音声一覧API
 app.get('/api/samples', async (req, res) => {
@@ -95,62 +140,114 @@ app.get('/api/samples', async (req, res) => {
         const samplesDir = path.join(__dirname, 'public/audio/samples');
 
         if (!await fs.access(samplesDir).then(() => true).catch(() => false)) {
-            return res.json([]);
+            return res.json({ japanese: [], english: [] });
         }
 
-        const samples = [];
-        const items = await fs.readdir(samplesDir);
-        const speakerDirs = [];
+        const result = {
+            japanese: [],
+            english: []
+        };
 
-        for (const item of items) {
-            const fullPath = path.join(samplesDir, item);
-            const stat = await fs.stat(fullPath);
-            if (stat.isDirectory() && item.startsWith('speaker_')) {
-                speakerDirs.push(item);
+        // 日本語サンプル（VOICEVOX）を取得
+        const japaneseDir = path.join(samplesDir, 'japanese');
+        if (await fs.access(japaneseDir).then(() => true).catch(() => false)) {
+            const japaneseItems = await fs.readdir(japaneseDir);
+            const speakerDirs = japaneseItems.filter(item => {
+                const fullPath = path.join(japaneseDir, item);
+                return fs.statSync(fullPath).isDirectory() && item.startsWith('speaker_');
+            });
+
+            // 話者一覧を読み込み（名前取得用）
+            let speakers = [];
+            try {
+                const speakersFile = path.join(__dirname, 'data/voicevox-speakers.json');
+                const speakersData = await fs.readFile(speakersFile, 'utf8');
+                speakers = JSON.parse(speakersData);
+            } catch (error) {
+                console.warn('話者一覧の読み込みに失敗しました:', error.message);
             }
-        }
 
-        // 話者一覧を読み込み（名前取得用）
-        let speakers = [];
-        try {
-            const speakersFile = path.join(__dirname, 'data/voicevox-speakers.json');
-            const speakersData = await fs.readFile(speakersFile, 'utf8');
-            speakers = JSON.parse(speakersData);
-        } catch (error) {
-            console.warn('話者一覧の読み込みに失敗しました:', error.message);
-        }
+            for (const speakerDir of speakerDirs) {
+                const speakerId = parseInt(speakerDir.replace('speaker_', ''));
+                const speakerPath = path.join(japaneseDir, speakerDir);
 
-        for (const speakerDir of speakerDirs) {
-            const speakerId = parseInt(speakerDir.replace('speaker_', ''));
-            const speakerPath = path.join(samplesDir, speakerDir);
+                // sample_call.wav または sample_call.mp3 を探す
+                const audioFiles = ['sample_call.mp3', 'sample_call.wav'];
+                let audioFile = null;
 
-            // sample_call.wav または sample_call.mp3 を探す
-            const audioFiles = ['sample_call.mp3', 'sample_call.wav'];
-            let audioFile = null;
+                for (const file of audioFiles) {
+                    if (await fs.access(path.join(speakerPath, file)).then(() => true).catch(() => false)) {
+                        audioFile = file;
+                        break;
+                    }
+                }
 
-            for (const file of audioFiles) {
-                if (await fs.access(path.join(speakerPath, file)).then(() => true).catch(() => false)) {
-                    audioFile = file;
-                    break;
+                if (audioFile) {
+                    const speaker = speakers.find(s => s.id === speakerId);
+                    const speakerName = speaker ? speaker.name : `Speaker ${speakerId}`;
+
+                    result.japanese.push({
+                        speakerId: speakerId,
+                        speakerName: speakerName,
+                        audioUrl: `/audio/samples/japanese/${speakerDir}/${audioFile}`,
+                        type: 'voicevox'
+                    });
                 }
             }
+        }
 
-            if (audioFile) {
-                const speaker = speakers.find(s => s.id === speakerId);
-                const speakerName = speaker ? speaker.name : `Speaker ${speakerId}`;
+        // 英語サンプル（Kokoro TTS）を取得
+        const englishDir = path.join(samplesDir, 'english');
+        if (await fs.access(englishDir).then(() => true).catch(() => false)) {
+            const englishItems = await fs.readdir(englishDir);
+            const voiceDirs = englishItems.filter(item => {
+                const fullPath = path.join(englishDir, item);
+                return fs.statSync(fullPath).isDirectory();
+            });
 
-                samples.push({
-                    speakerId: speakerId,
-                    speakerName: speakerName,
-                    audioUrl: `/audio/samples/${speakerDir}/${audioFile}`
-                });
+            // Kokoro音声一覧を読み込み（名前取得用）
+            let kokoroVoices = [];
+            try {
+                const kokoroVoicesFile = path.join(__dirname, 'data/kokoro-voices.json');
+                const kokoroVoicesData = await fs.readFile(kokoroVoicesFile, 'utf8');
+                kokoroVoices = JSON.parse(kokoroVoicesData);
+            } catch (error) {
+                console.warn('Kokoro音声一覧の読み込みに失敗しました:', error.message);
+            }
+
+            for (const voiceDir of voiceDirs) {
+                const voicePath = path.join(englishDir, voiceDir);
+
+                // sample_call.wav または sample_call.mp3 を探す
+                const audioFiles = ['sample_call.mp3', 'sample_call.wav'];
+                let audioFile = null;
+
+                for (const file of audioFiles) {
+                    if (await fs.access(path.join(voicePath, file)).then(() => true).catch(() => false)) {
+                        audioFile = file;
+                        break;
+                    }
+                }
+
+                if (audioFile) {
+                    const voice = kokoroVoices.find(v => v.id === voiceDir);
+                    const voiceName = voice ? voice.name : voiceDir.charAt(0).toUpperCase() + voiceDir.slice(1).replace(/_/g, ' ');
+
+                    result.english.push({
+                        voiceId: voiceDir,
+                        voiceName: voiceName,
+                        audioUrl: `/audio/samples/english/${voiceDir}/${audioFile}`,
+                        type: 'kokoro'
+                    });
+                }
             }
         }
 
-        // スピーカーIDでソート
-        samples.sort((a, b) => a.speakerId - b.speakerId);
+        // ソート
+        result.japanese.sort((a, b) => a.speakerId - b.speakerId);
+        result.english.sort((a, b) => a.voiceName.localeCompare(b.voiceName));
 
-        res.json(samples);
+        res.json(result);
 
     } catch (error) {
         console.error('サンプル一覧取得エラー:', error);
@@ -289,12 +386,7 @@ app.get('/events', (req, res) => {
     });
 });
 
-// ルーターマウント
-app.use('/api/voicevox', voicevoxRouter);
-// 設定ページ
-app.get('/voicevox-settings', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'settings.html'));
-});
+
 
 // --- 管理者ページルート ---
 // 管理者ログイン
@@ -322,6 +414,17 @@ app.get('/admin/channel/edit', (req, res) => {
     res.sendFile(path.join(__dirname, 'admin.html'));
 });
 
+// チャンネル詳細情報取得（一般ユーザー用）- パスワードを除く
+app.get('/api/channel-details', (req, res) => {
+    const channelDetails = channels.map(channel => ({
+        name: channel.name,
+        voiceId: channel.voiceId || 'voice1', // デフォルト値を設定
+        roomCount: channel.roomCount || 7, // デフォルト値を設定
+        useReception: channel.useReception !== false // デフォルト値を設定
+    }));
+    res.json(channelDetails);
+});
+
 // チャンネル情報取得（管理者用）
 app.get('/admin/api/channels', requireAdminAuth, (req, res) => {
     res.json(channels);
@@ -339,6 +442,20 @@ app.post('/admin/api/channels', requireAdminAuth, async (req, res) => {
         for (const channel of newChannels) {
             if (!channel.name || !channel.password) {
                 return res.status(400).json({ message: 'すべてのチャンネルにnameとpasswordが必要です。' });
+            }
+
+            // 診察室数のバリデーション
+            if (channel.roomCount !== undefined) {
+                const roomCount = parseInt(channel.roomCount);
+                if (isNaN(roomCount) || roomCount < 1 || roomCount > 10) {
+                    return res.status(400).json({ message: '診察室数は1-10の範囲で入力してください。' });
+                }
+                channel.roomCount = roomCount; // 数値に変換
+            }
+
+            // useReceptionのバリデーション
+            if (channel.useReception !== undefined && typeof channel.useReception !== 'boolean') {
+                return res.status(400).json({ message: '受付使用設定はboolean値である必要があります。' });
             }
         }
 
@@ -388,14 +505,11 @@ app.get('/receiver', (req, res) => res.sendFile(path.join(__dirname, 'public', '
 
 async function startServer() {
     try {
-        await settingsManager.initializeSettings();
         app.listen(PORT, () => {
-            const currentSettings = settingsManager.getCurrentSettings();
             console.log(`${getCurrentTimestampIntl()}: サーバー起動完了 Port: ${PORT}`);
-            console.log(`${getCurrentTimestampIntl()}: 現在のVoicevox設定: SpeakerID=${currentSettings.speakerId}, Pitch=${currentSettings.pitch}`);
             console.log(`${getCurrentTimestampIntl()}: 操作用ページ: http://localhost:${PORT}`);
             console.log(`${getCurrentTimestampIntl()}: 音声再生用ページ: http://localhost:${PORT}/receiver`);
-            console.log(`${getCurrentTimestampIntl()}: 設定ページURL (開発者用): http://localhost:${PORT}/voicevox-settings`);
+            console.log(`${getCurrentTimestampIntl()}: 管理者ページ: http://localhost:${PORT}/admin/channel/edit`);
         });
     } catch (error) {
         console.error("サーバーの起動に失敗しました:", error);

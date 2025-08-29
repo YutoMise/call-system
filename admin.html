@@ -351,10 +351,19 @@
                     <div class="form-group">
                         <label for="newChannelVoice">音声:</label>
                         <select id="newChannelVoice">
-                            <option value="voice1">音声1</option>
-                            <option value="voice2">音声2</option>
+                            <option value="voice1">四国めたん(ID:6)</option>
+                            <option value="voice2">af_sarah</option>
                             <option value="voice3">音声3</option>
                         </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="newChannelRoomCount">診察室数:</label>
+                        <input type="number" id="newChannelRoomCount" min="1" max="10" value="7" placeholder="診察室数 (1-10)">
+                    </div>
+                    <div class="form-group">
+                        <label for="newChannelUseReception">受付使用:</label>
+                        <input type="checkbox" id="newChannelUseReception" checked>
+                        <span class="help-text">受付ボタンを表示するかどうか</span>
                     </div>
                     <div class="form-group">
                         <button class="btn btn-primary" onclick="addChannel()">追加</button>
@@ -475,6 +484,8 @@
                 document.getElementById('newChannelName').value = '';
                 document.getElementById('newChannelPassword').value = '';
                 document.getElementById('newChannelVoice').value = 'voice1';
+                document.getElementById('newChannelRoomCount').value = '7';
+                document.getElementById('newChannelUseReception').checked = true;
             } catch (error) {
                 showMessage('adminMessage', 'チャンネル情報の読み込みに失敗しました。', 'error');
             }
@@ -521,10 +532,18 @@
                         <div class="channel-field">
                             <label>音声</label>
                             <select id="channelVoice_${index}">
-                                <option value="voice1" ${voiceId === 'voice1' ? 'selected' : ''}>音声1</option>
-                                <option value="voice2" ${voiceId === 'voice2' ? 'selected' : ''}>音声2</option>
+                                <option value="voice1" ${voiceId === 'voice1' ? 'selected' : ''}>音声1 (四国めたん ツンツン)</option>
+                                <option value="voice2" ${voiceId === 'voice2' ? 'selected' : ''}>音声2 (af_sarah 英語)</option>
                                 <option value="voice3" ${voiceId === 'voice3' ? 'selected' : ''}>音声3</option>
                             </select>
+                        </div>
+                        <div class="channel-field">
+                            <label>診察室数</label>
+                            <input type="number" min="1" max="10" value="${channel.roomCount || 7}" id="channelRoomCount_${index}">
+                        </div>
+                        <div class="channel-field">
+                            <label>受付使用</label>
+                            <input type="checkbox" ${channel.useReception !== false ? 'checked' : ''} id="channelUseReception_${index}">
                         </div>
                     </div>
                     <div class="channel-actions">
@@ -541,9 +560,16 @@
             const name = document.getElementById('newChannelName').value.trim();
             const password = document.getElementById('newChannelPassword').value.trim();
             const voiceId = document.getElementById('newChannelVoice').value;
+            const roomCount = parseInt(document.getElementById('newChannelRoomCount').value) || 7;
+            const useReception = document.getElementById('newChannelUseReception').checked;
 
             if (!name || !password) {
                 showMessage('adminMessage', 'チャンネル名とパスワードを入力してください。', 'error');
+                return;
+            }
+
+            if (roomCount < 1 || roomCount > 10) {
+                showMessage('adminMessage', '診察室数は1-10の範囲で入力してください。', 'error');
                 return;
             }
 
@@ -563,8 +589,8 @@
                     return;
                 }
 
-                // 新しいチャンネルを追加（voiceIdを含む）
-                channels.push({ name, password, voiceId });
+                // 新しいチャンネルを追加（全フィールドを含む）
+                channels.push({ name, password, voiceId, roomCount, useReception });
 
                 await saveChannelsData(channels);
 
@@ -572,6 +598,8 @@
                 document.getElementById('newChannelName').value = '';
                 document.getElementById('newChannelPassword').value = '';
                 document.getElementById('newChannelVoice').value = 'voice1'; // デフォルトに戻す
+                document.getElementById('newChannelRoomCount').value = '7';
+                document.getElementById('newChannelUseReception').checked = true;
 
             } catch (error) {
                 showMessage('adminMessage', 'チャンネルの追加に失敗しました。', 'error');
@@ -583,9 +611,16 @@
             const name = document.getElementById(`channelName_${index}`).value.trim();
             const password = document.getElementById(`channelPassword_${index}`).value.trim();
             const voiceId = document.getElementById(`channelVoice_${index}`).value;
+            const roomCount = parseInt(document.getElementById(`channelRoomCount_${index}`).value) || 7;
+            const useReception = document.getElementById(`channelUseReception_${index}`).checked;
 
             if (!name || !password) {
                 showMessage('adminMessage', 'チャンネル名とパスワードを入力してください。', 'error');
+                return;
+            }
+
+            if (roomCount < 1 || roomCount > 10) {
+                showMessage('adminMessage', '診察室数は1-10の範囲で入力してください。', 'error');
                 return;
             }
 
@@ -605,8 +640,8 @@
                     return;
                 }
 
-                // チャンネルを更新（voiceIdを含む）
-                channels[index] = { name, password, voiceId };
+                // チャンネルを更新（全フィールドを含む）
+                channels[index] = { name, password, voiceId, roomCount, useReception };
 
                 await saveChannelsData(channels);
 

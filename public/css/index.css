@@ -347,3 +347,171 @@ header {
 header .page-button.tutorial-highlight {
     position: absolute !important; /* 元の position: absolute を強制 */
 }
+
+/* チャンネル吹き出しボタンのスタイル */
+.channel-bubble {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background-color: var(--primary-accent);
+    color: white;
+    padding: 8px 15px;
+    border-radius: var(--border-radius-round);
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+    box-shadow: var(--box-shadow-light);
+    transition: all 0.2s ease;
+    user-select: none;
+    margin-bottom: 15px;
+}
+
+.channel-bubble:hover {
+    background-color: #0b5ed7;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.channel-bubble.not-connected {
+    background-color: var(--error-color);
+}
+
+.channel-bubble.not-connected:hover {
+    background-color: #b02a37;
+}
+
+.bubble-arrow {
+    font-size: 0.7rem;
+    transition: transform 0.2s ease;
+}
+
+.channel-bubble:hover .bubble-arrow {
+    transform: translateY(1px);
+}
+
+/* モーダルのスタイル */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    animation: fadeIn 0.2s ease;
+}
+
+.modal-content {
+    background-color: var(--base-bg);
+    margin: 10% auto;
+    border-radius: var(--border-radius-soft);
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    animation: slideIn 0.3s ease;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 25px 15px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.modal-header h3 {
+    margin: 0;
+    color: var(--text-color);
+}
+
+.modal-close {
+    font-size: 24px;
+    font-weight: bold;
+    cursor: pointer;
+    color: var(--text-color);
+    opacity: 0.7;
+    transition: opacity 0.2s ease;
+}
+
+.modal-close:hover {
+    opacity: 1;
+}
+
+.modal-body {
+    padding: 20px 25px;
+}
+
+.modal-footer {
+    padding: 15px 25px 20px;
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.modal-status {
+    margin-top: 15px;
+    padding: 10px;
+    border-radius: var(--border-radius-soft);
+    font-size: 0.9rem;
+    text-align: center;
+}
+
+.modal-status.success {
+    background-color: #d1edff;
+    color: var(--success-color);
+    border: 1px solid #b3d9ff;
+}
+
+.modal-status.error {
+    background-color: #f8d7da;
+    color: var(--error-color);
+    border: 1px solid #f5c6cb;
+}
+
+.btn-primary, .btn-secondary {
+    padding: 8px 16px;
+    border: none;
+    border-radius: var(--border-radius-soft);
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.btn-primary {
+    background-color: var(--primary-accent);
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: #0b5ed7;
+}
+
+.btn-secondary {
+    background-color: var(--input-bg);
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+}
+
+.btn-secondary:hover {
+    background-color: var(--border-color);
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

@@ -18,9 +18,13 @@
     
     RUN find public/js -type f -name '*.js' -print0 | xargs -0 -n 1 -I {} sh -c 'echo "Tersering {}" && npx terser "{}" --compress --mangle --format comments=false -o "{}"'
     
-    RUN find routes -type f -name '*.js' -print0 | xargs -0 -n 1 -I {} sh -c 'echo "Tersering {}" && npx terser "{}" --compress --mangle --format comments=false -o "{}"'
-    
-    RUN find utils -type f -name '*.js' -print0 | xargs -0 -n 1 -I {} sh -c 'echo "Tersering {}" && npx terser "{}" --compress --mangle --format comments=false -o "{}"'
+    RUN if [ -n "$(find routes -type f -name '*.js' 2>/dev/null)" ]; then \
+            find routes -type f -name '*.js' -print0 | xargs -0 -n 1 -I {} sh -c 'echo "Tersering {}" && npx terser "{}" --compress --mangle --format comments=false -o "{}"'; \
+        fi
+
+    RUN if [ -n "$(find utils -type f -name '*.js' 2>/dev/null)" ]; then \
+            find utils -type f -name '*.js' -print0 | xargs -0 -n 1 -I {} sh -c 'echo "Tersering {}" && npx terser "{}" --compress --mangle --format comments=false -o "{}"'; \
+        fi
 
 
 
@@ -34,14 +38,21 @@
     RUN rm -rf public/js
     RUN mv ./obfuscated_public_js public/js
 
-    RUN npx javascript-obfuscator routes --output ./obfuscated_routes ${OBFUSCATOR_OPTIONS}
-    RUN rm -rf routes
-    RUN mv ./obfuscated_routes routes
+    RUN if [ -d "routes" ] && [ -n "$(find routes -type f -name '*.js' 2>/dev/null)" ]; then \
+            npx javascript-obfuscator routes --output ./obfuscated_routes ${OBFUSCATOR_OPTIONS} && \
+            rm -rf routes && \
+            mv ./obfuscated_routes routes; \
+        fi
 
-    RUN npx javascript-obfuscator utils --output ./obfuscated_utils ${OBFUSCATOR_OPTIONS}
-    RUN rm -rf utils
-    RUN mv ./obfuscated_utils utils
-    
+    RUN if [ -d "utils" ] && [ -n "$(find utils -type f -name '*.js' 2>/dev/null)" ]; then \
+            npx javascript-obfuscator utils --output ./obfuscated_utils ${OBFUSCATOR_OPTIONS} && \
+            rm -rf utils && \
+            mv ./obfuscated_utils utils; \
+        fi
+
+    # apiフォルダは難読化しない（samples.js用）
+    # api フォルダはそのまま残す
+
     #-----------------------------------------
     # Stage 2: ランナー - 実行環境
     #-----------------------------------------
