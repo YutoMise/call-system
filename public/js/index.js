@@ -1,22 +1,38 @@
 
-// --- DOM要素 (変更なし) ---
-const channelSelect = document.getElementById('channelSelect');
-const refreshChannelsBtn = document.getElementById('refreshChannels');
-const channelPasswordInput = document.getElementById('channelPassword');
-const ticketNumberInput = document.getElementById('ticketNumber');
-const roomButtonsContainer = document.getElementById('roomButtons');
-const announceButton = document.getElementById('announceButton');
-const announcementStatus = document.getElementById('announcement-status');
-const toggleCreateChannelBtn = document.getElementById('toggleCreateChannel');
-const createChannelDialog = document.getElementById('create-channel-dialog');
-const newChannelNameInput = document.getElementById('newChannelName');
-const newChannelPasswordInput = document.getElementById('newChannelPassword');
-const createChannelButton = document.getElementById('createChannelButton');
-const createChannelStatus = document.getElementById('create-channel-status');
+// --- DOM要素（DOMContentLoaded後に初期化） ---
+let ticketNumberInput, roomButtonsContainer, announceButton, announcementStatus;
+let channelBubble, channelBubbleText;
+let channelModal, modalChannelSelect, modalRefreshChannels, modalChannelPassword;
+let modalTestConnection, modalSaveChannel, modalClose, modalStatus;
 let selectedRoom = null;
 
-// --- 診察室ボタン生成（動的） ---
+// --- グローバル変数 ---
 let currentChannelConfig = null;
+let currentChannelName = null;
+let currentChannelPassword = null;
+
+// DOM要素を初期化する関数
+function initializeDOM() {
+    // メイン画面要素
+    ticketNumberInput = document.getElementById('ticketNumber');
+    roomButtonsContainer = document.getElementById('roomButtons');
+    announceButton = document.getElementById('announceButton');
+    announcementStatus = document.getElementById('announcement-status');
+
+    // チャンネル吹き出しボタン
+    channelBubble = document.getElementById('channelBubble');
+    channelBubbleText = document.getElementById('channelBubbleText');
+
+    // モーダル要素
+    channelModal = document.getElementById('channelModal');
+    modalChannelSelect = document.getElementById('modalChannelSelect');
+    modalRefreshChannels = document.getElementById('modalRefreshChannels');
+    modalChannelPassword = document.getElementById('modalChannelPassword');
+    modalTestConnection = document.getElementById('modalTestConnection');
+    modalSaveChannel = document.getElementById('modalSaveChannel');
+    modalClose = document.querySelector('.modal-close');
+    modalStatus = document.getElementById('modalStatus');
+}
 
 // 診察室ボタンを動的に生成する関数
 function generateRoomButtons(roomCount, useReception) {
@@ -57,97 +73,132 @@ function generateRoomButtons(roomCount, useReception) {
     }
 }
 
-// デフォルトの診察室ボタンを生成（初期表示用）
-generateRoomButtons(7, true);
 
-document.addEventListener('DOMContentLoaded', () => {
-    const channelSelect = document.getElementById('channelSelect');
-    const channelPasswordInput = document.getElementById('channelPassword');
-    const announceButton = document.getElementById('announceButton'); // アナウンスボタンも取得
 
-    // --- 1. ページ読み込み時に保存された値を読み込む ---
-    const savedChannel = localStorage.getItem('selectedChannel');
-    const savedPassword = localStorage.getItem('channelPassword');
+// --- モーダル関連の関数 ---
+// モーダルを開く
+function openChannelModal() {
+    channelModal.style.display = 'block';
+    loadChannelsToModal();
 
-    // 保存されたパスワードがあれば入力欄に設定
-    if (savedPassword) {
-        channelPasswordInput.value = savedPassword;
+    // 現在の設定を復元
+    if (currentChannelName) {
+        modalChannelSelect.value = currentChannelName;
+        modalChannelPassword.value = currentChannelPassword || '';
     }
+}
 
-    // チャンネルリストが読み込まれた後に、保存されたチャンネルを選択する
-    // 注意: チャンネルリストの読み込みが非同期の場合、
-    //      読み込み完了後にこの選択処理を行う必要があります。
-    //      ここでは、チャンネルリストが既に存在すると仮定します。
-    //      もし非同期で読み込んでいる場合は、その完了コールバック内で実行してください。
-    const setSavedChannel = () => {
-        if (savedChannel && channelSelect) {
-            // オプションが存在するか確認してから設定
-            const optionExists = Array.from(channelSelect.options).some(option => option.value === savedChannel);
-            if (optionExists) {
-                channelSelect.value = savedChannel;
-            } else {
-                console.warn(`Saved channel "${savedChannel}" not found in options.`);
-                // 必要であれば、保存された値をクリアするなどの処理を追加
-                // localStorage.removeItem('selectedChannel');
-            }
+// モーダルを閉じる
+function closeChannelModal() {
+    channelModal.style.display = 'none';
+    modalStatus.textContent = '';
+    modalStatus.className = 'modal-status';
+}
+
+// モーダルにチャンネルリストを読み込む
+async function loadChannelsToModal() {
+    try {
+        const channelNames = await apiCall('/api/channels');
+        modalChannelSelect.innerHTML = '<option value="">-- チャンネルを選択 --</option>';
+        if (Array.isArray(channelNames)) {
+            channelNames.sort().forEach(name => {
+                const option = document.createElement('option');
+                option.value = name;
+                option.textContent = name;
+                modalChannelSelect.appendChild(option);
+            });
         }
-    };
+    } catch (error) {
+        showModalStatus('チャンネルリストの取得に失敗しました。', 'error');
+    }
+}
 
-    // 例: チャンネルリスト更新ボタン(#refreshChannels)がクリックされた後や、
-    //     初期のチャンネルリスト読み込み完了後に setSavedChannel() を呼び出すようにする
-    //     (具体的な実装は既存のチャンネルリスト読み込み処理によります)
+// モーダルステータス表示
+function showModalStatus(message, type = '') {
+    modalStatus.textContent = message;
+    modalStatus.className = `modal-status ${type}`;
+}
 
-    // とりあえず、DOM読み込み完了時点で一度試みる
-    setSavedChannel();
+// 接続テスト
+async function testConnection() {
+    const channelName = modalChannelSelect.value;
+    const password = modalChannelPassword.value;
 
-    // もしチャンネルリストの更新機能があるなら、更新後にも呼び出す
-    const refreshButton = document.getElementById('refreshChannels');
-    if (refreshButton) {
-        // refreshButton がチャンネルリストを更新する処理の完了後に
-        // setSavedChannel() を実行するように実装を調整してください。
-        // 例 (仮): refreshButton.addEventListener('click', async () => {
-        //     await updateChannelList(); // チャンネルリスト更新処理 (非同期と仮定)
-        //     setSavedChannel(); // 更新後に保存されたチャンネルを選択
-        // });
+    if (!channelName || !password) {
+        showModalStatus('チャンネルとパスワードを入力してください。', 'error');
+        return;
     }
 
+    showModalStatus('接続をテスト中...', '');
 
-    // --- 2. 値が変更された時に localStorage に保存する ---
-
-    // チャンネルが変更されたら保存
-    if (channelSelect) {
-        channelSelect.addEventListener('change', () => {
-            localStorage.setItem('selectedChannel', channelSelect.value);
+    try {
+        // テスト用のアナウンス送信（実際には送信しない）
+        const response = await fetch('/api/announce', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                channelName,
+                password,
+                ticketNumber: '0',
+                roomNumber: '1'
+            })
         });
+
+        if (response.ok) {
+            showModalStatus('接続に成功しました！', 'success');
+        } else {
+            const errorData = await response.json();
+            showModalStatus(errorData.message || '接続に失敗しました。', 'error');
+        }
+    } catch (error) {
+        showModalStatus('接続テストに失敗しました。', 'error');
+    }
+}
+
+// チャンネル設定を保存
+function saveChannelSettings() {
+    const channelName = modalChannelSelect.value;
+    const password = modalChannelPassword.value;
+
+    if (!channelName || !password) {
+        showModalStatus('チャンネルとパスワードを入力してください。', 'error');
+        return;
     }
 
-    // パスワードが入力されたら保存
-    // 'input' イベントは入力の度に発火します
-    if (channelPasswordInput) {
-        channelPasswordInput.addEventListener('input', () => {
-            localStorage.setItem('channelPassword', channelPasswordInput.value);
-        });
+    // ローカルストレージに保存
+    localStorage.setItem('selectedChannel', channelName);
+    localStorage.setItem('channelPassword', password);
+
+    // グローバル変数を更新
+    currentChannelName = channelName;
+    currentChannelPassword = password;
+
+    // 吹き出しボタンを更新
+    updateChannelBubble();
+
+    // チャンネル設定に応じて診察室ボタンを更新
+    onChannelChange();
+
+    showModalStatus('設定を保存しました！', 'success');
+
+    // 1秒後にモーダルを閉じる
+    setTimeout(() => {
+        closeChannelModal();
+    }, 1000);
+}
+
+// チャンネル吹き出しボタンを更新
+function updateChannelBubble() {
+    if (currentChannelName) {
+        channelBubbleText.textContent = currentChannelName;
+        channelBubble.classList.remove('not-connected');
+    } else {
+        channelBubbleText.textContent = 'チャンネル未選択';
+        channelBubble.classList.add('not-connected');
     }
+}
 
-    /*
-    // --- 別案: アナウンス開始時にのみ保存する場合 ---
-    // パスワードの保存タイミングをより限定したい場合（例：アナウンス成功時など）はこちらを参考にします。
-    // 上記の channelPasswordInput の 'input' イベントリスナーを削除し、
-    // announceButton のクリックイベントリスナー（既存のものがあればそれに追記）内で保存します。
 
-    if (announceButton && channelPasswordInput && channelSelect) {
-        announceButton.addEventListener('click', () => {
-            // ここでアナウンス実行処理が行われると仮定
-            // 成功した場合や、ボタンが押されたタイミングで保存
-            console.log('Saving channel and password on announce click.'); // デバッグ用
-            localStorage.setItem('selectedChannel', channelSelect.value);
-            localStorage.setItem('channelPassword', channelPasswordInput.value);
-
-            // 注意: 本来のアナウンス処理を妨げないようにしてください。
-            //       非同期処理がある場合は、その完了を待つ必要はありません。
-        });
-    }
-    */
 
     document.addEventListener('keydown', (e) => {
         // '*' キーが押された場合
@@ -299,19 +350,7 @@ async function apiCall(endpoint, options = {}) {
     }
 }
 
-// --- チャンネルリスト処理 (変更なし) ---
-function populateChannelList(channelNames) {
-    channelSelect.innerHTML = '<option value="">-- チャンネルを選択 --</option>'; // 初期オプション
-    if (Array.isArray(channelNames)) { // 配列であることを確認
-        channelNames.sort().forEach(name => {
-            const option = document.createElement('option');
-            option.value = name; option.textContent = name; channelSelect.appendChild(option);
-        });
-    } else {
-            console.error("受信したチャンネルリストが配列ではありません:", channelNames);
-            // エラー表示など
-    }
-}
+
 
 // チャンネル詳細情報を取得する関数
 async function fetchChannelDetails() {
@@ -328,10 +367,9 @@ async function fetchChannelDetails() {
     }
 }
 
-// チャンネル選択時の処理
+// チャンネル選択時の処理（現在のチャンネル設定に基づく）
 async function onChannelChange() {
-    const selectedChannelName = channelSelect.value;
-    if (!selectedChannelName) {
+    if (!currentChannelName) {
         // チャンネルが選択されていない場合はデフォルト設定
         generateRoomButtons(7, true);
         currentChannelConfig = null;
@@ -340,7 +378,7 @@ async function onChannelChange() {
 
     try {
         const channelDetails = await fetchChannelDetails();
-        const channelConfig = channelDetails.find(ch => ch.name === selectedChannelName);
+        const channelConfig = channelDetails.find(ch => ch.name === currentChannelName);
 
         if (channelConfig) {
             currentChannelConfig = channelConfig;
@@ -358,40 +396,62 @@ async function onChannelChange() {
     }
 }
 
-async function fetchChannelList() {
-    console.log("チャンネルリストを要求中...");
-    announcementStatus.textContent = 'チャンネルリストを読込中...'; // ユーザーにフィードバック
-    announcementStatus.className = '';
-    try {
-        const channelNames = await apiCall('/api/channels'); // GETリクエスト
-        console.log('チャンネルリスト受信:', channelNames);
-        populateChannelList(channelNames);
-        announcementStatus.textContent = ''; // 成功したらメッセージを消す
-    } catch (error) {
-        announcementStatus.textContent = `リスト取得エラー: ${error.message || 'サーバーとの通信に失敗しました。'}`;
-        announcementStatus.className = 'error';
+
+
+// イベントリスナーを設定する関数
+function setupEventListeners() {
+    // チャンネル吹き出しボタンのイベントリスナー
+    if (channelBubble) {
+        channelBubble.addEventListener('click', openChannelModal);
+    }
+
+    // モーダル関連のイベントリスナー
+    if (modalClose) {
+        modalClose.addEventListener('click', closeChannelModal);
+    }
+    if (modalRefreshChannels) {
+        modalRefreshChannels.addEventListener('click', (e) => {
+            e.preventDefault();
+            loadChannelsToModal();
+        });
+    }
+    if (modalTestConnection) {
+        modalTestConnection.addEventListener('click', testConnection);
+    }
+    if (modalSaveChannel) {
+        modalSaveChannel.addEventListener('click', saveChannelSettings);
+    }
+
+    // モーダル外クリックで閉じる
+    if (channelModal) {
+        channelModal.addEventListener('click', (e) => {
+            if (e.target === channelModal) {
+                closeChannelModal();
+            }
+        });
+    }
+
+    // アナウンスボタンのイベントリスナー
+    if (announceButton) {
+        announceButton.addEventListener('click', handleAnnounceClick);
     }
 }
 
-// --- UIイベントリスナー ---
-// チャンネル選択時のイベントリスナー
-channelSelect.addEventListener('change', onChannelChange);
-
-refreshChannelsBtn.addEventListener('click', (e) => {
-        e.preventDefault(); // ボタンのデフォルト動作を防ぐ
-        fetchChannelList();
-});
-
-announceButton.addEventListener('click', async (e) => {
+// アナウンス処理関数
+async function handleAnnounceClick(e) {
     e.preventDefault();
-    const channelName = channelSelect.value;
-    const password = channelPasswordInput.value;
     const ticketNumber = ticketNumberInput.value;
     const roomNumber = selectedRoom;
 
-    // --- 入力チェック (変更なし) ---
-    if (!channelName || !password || !ticketNumber || !roomNumber) {
-        announcementStatus.textContent = 'エラー: 全ての項目を入力/選択してください。';
+    // --- 入力チェック ---
+    if (!currentChannelName || !currentChannelPassword) {
+        announcementStatus.textContent = 'エラー: チャンネル設定が必要です。上のボタンから設定してください。';
+        announcementStatus.className = 'error';
+        return;
+    }
+
+    if (!ticketNumber || !roomNumber) {
+        announcementStatus.textContent = 'エラー: 整理券番号と診察室を入力/選択してください。';
         announcementStatus.className = 'error';
         return;
     }
@@ -403,7 +463,12 @@ announceButton.addEventListener('click', async (e) => {
         const result = await apiCall('/api/announce', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ channelName, password, ticketNumber, roomNumber })
+            body: JSON.stringify({
+                channelName: currentChannelName,
+                password: currentChannelPassword,
+                ticketNumber,
+                roomNumber
+            })
         });
         announcementStatus.textContent = result.message || 'アナウンスを送信しました。';
         announcementStatus.className = 'success';
@@ -416,13 +481,39 @@ announceButton.addEventListener('click', async (e) => {
         announcementStatus.textContent = `送信エラー: ${error.message || 'サーバーとの通信に失敗しました。'}`;
         announcementStatus.className = 'error';
     }
-});
+}
 
 // --- 初期化 ---
-fetchChannelList(); // ページ読み込み時にリスト取得
+// ページ読み込み時の初期化
+function initializeApp() {
+    // DOM要素を初期化
+    initializeDOM();
 
-    
-    // Tutorial Feature
+    // イベントリスナーを設定
+    setupEventListeners();
+
+    // デフォルトの診察室ボタンを生成
+    generateRoomButtons(7, true);
+
+    // ローカルストレージから設定を復元
+    const savedChannel = localStorage.getItem('selectedChannel');
+    const savedPassword = localStorage.getItem('channelPassword');
+
+    if (savedChannel && savedPassword) {
+        currentChannelName = savedChannel;
+        currentChannelPassword = savedPassword;
+        updateChannelBubble();
+        onChannelChange(); // チャンネル設定に応じて診察室ボタンを更新
+    } else {
+        updateChannelBubble(); // 未選択状態で表示
+    }
+}
+
+// DOMContentLoaded時に初期化
+document.addEventListener('DOMContentLoaded', initializeApp);
+
+// Tutorial Feature
+document.addEventListener('DOMContentLoaded', () => {
     const tutorialButton = document.getElementById('tutorialButton');
     const tutorialOverlay = document.getElementById('tutorialOverlay');
     const tutorialTooltip = document.getElementById('tutorialTooltip');
@@ -439,8 +530,7 @@ fetchChannelList(); // ページ読み込み時にリスト取得
     const tutorialSteps = [
         { selector: 'header .sender-button.current-page', text: 'ここは「送信側」ページです。整理券番号や診察室を指定して、呼び出しアナウンスを送信します。' },
         { selector: 'header .receiver-button', text: '「受信側」ページへのリンクです。音声アナウンスの再生やログ確認はこちらで行います。' },
-        { selector: '#channel-selection-group', text: 'アナウンスを送信する「チャンネル」を選択します。受信側と同じチャンネルを選んでください。右の「更新」ボタンでチャンネルリストを最新にできます。' },
-        { selector: '#password-input-group', text: '選択したチャンネルの「パスワード」を入力します。受信側と一致している必要があります。' },
+        { selector: '#channelBubble', text: 'チャンネル設定ボタンです。クリックしてチャンネルとパスワードを設定します。' },
         { selector: '#ticket-number-input-group', text: '呼び出す「整理券番号」を数字で入力します。' },
         { selector: '#roomButtons', text: '呼び出し先の「診察室番号」を選択します。選択した番号がアナウンス内容に含まれます。' },
         { selector: '#announceButton', text: '入力・選択した内容で「アナウンス開始」します。クリックすると受信側で音声が再生されます。' },
@@ -576,5 +666,4 @@ fetchChannelList(); // ページ読み込み時にリスト取得
             endTutorial();
         }
     });
-    // (ここまでが元々2つ目のDOMContentLoaded内にあったチュートリアル機能です)
-}); // 最初のDOMContentLoadedの閉じ括弧
+});
