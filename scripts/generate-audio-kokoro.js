@@ -3,7 +3,7 @@ const fs = require('node:fs');
 require('dotenv').config({ path: require('node:path').join(__dirname, '../.env') }); // .envファイルを読み込む
 const { execSync } = require('node:child_process'); // ffmpeg実行のため追加
 const path = require('node:path');
-const ffmpegPath = 'ffmpeg'; // システムのffmpegを使用
+const ffmpegPath = require('ffmpeg-static');
 const fetch = require('node-fetch');
 
 const KOKORO_TTS_API_URL = process.env.KOKORO_TTS_URL || 'http://localhost:8880';

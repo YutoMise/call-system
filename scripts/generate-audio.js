@@ -6,7 +6,7 @@ const path = require('node:path');
 // node-fetchのv3以降はESMのみサポートのため、package.jsonに "type": "module" を追加するか、
 // CommonJSで使えるv2系 (npm install node-fetch@2) をインストールしてください。
 // 以下は node-fetch v2 を想定した書き方です。
-const ffmpegPath = 'ffmpeg'; // システムのffmpegを使用
+const ffmpegPath = require('ffmpeg-static');
 const fetch = require('node-fetch');
 
 const VOICEVOX_API_URL = process.env.VOICEVOX_URL || 'http://localhost:50021';
