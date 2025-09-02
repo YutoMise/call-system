@@ -131,6 +131,24 @@
             align-items: center;
             margin-bottom: 30px;
         }
+
+        .admin-nav {
+            display: flex;
+            align-items: center;
+        }
+
+        .btn-info {
+            background-color: #17a2b8;
+            color: white;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-info:hover {
+            background-color: #138496;
+            color: white;
+            text-decoration: none;
+        }
         
         .current-data {
             background: #f8f9fa;
@@ -326,7 +344,10 @@
         <div id="adminPanel" class="admin-panel">
             <div class="header">
                 <h1>チャンネル管理</h1>
-                <button class="btn btn-secondary" onclick="logout()">ログアウト</button>
+                <div class="admin-nav">
+                    <a href="/admin/logs" class="btn btn-info" target="_blank" style="margin-right: 10px;">📋 システムログ</a>
+                    <button class="btn btn-secondary" onclick="logout()">ログアウト</button>
+                </div>
             </div>
             
             <div class="current-data">

@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>システムログ - 管理者画面</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            color: #2c3e50;
+            font-size: 24px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 15px;
+        }
+
+        .nav-links a {
+            color: #3498db;
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+
+        .nav-links a:hover {
+            background-color: #ecf0f1;
+        }
+
+        .controls {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .controls-row {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .control-group label {
+            font-size: 12px;
+            color: #666;
+            font-weight: 500;
+        }
+
+        select, input, button {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #2980b9;
+        }
+
+        .refresh-btn {
+            background-color: #27ae60;
+        }
+
+        .refresh-btn:hover {
+            background-color: #229954;
+        }
+
+        .clear-btn {
+            background-color: #e74c3c;
+        }
+
+        .clear-btn:hover {
+            background-color: #c0392b;
+        }
+
+        .log-container {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .log-header {
+            background-color: #34495e;
+            color: white;
+            padding: 15px 20px;
+            font-weight: 500;
+        }
+
+        .log-content {
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        .log-entry {
+            padding: 12px 20px;
+            border-bottom: 1px solid #ecf0f1;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            transition: background-color 0.2s;
+        }
+
+        .log-entry:hover {
+            background-color: #f8f9fa;
+        }
+
+        .log-entry:last-child {
+            border-bottom: none;
+        }
+
+        .log-timestamp {
+            color: #7f8c8d;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        .log-level {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 11px;
+            font-weight: bold;
+            margin-right: 8px;
+            min-width: 50px;
+            text-align: center;
+        }
+
+        .log-level.ERROR {
+            background-color: #e74c3c;
+            color: white;
+        }
+
+        .log-level.WARN {
+            background-color: #f39c12;
+            color: white;
+        }
+
+        .log-level.INFO {
+            background-color: #3498db;
+            color: white;
+        }
+
+        .log-level.DEBUG {
+            background-color: #95a5a6;
+            color: white;
+        }
+
+        .log-type {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 11px;
+            background-color: #ecf0f1;
+            color: #2c3e50;
+            margin-right: 8px;
+            min-width: 80px;
+            text-align: center;
+        }
+
+        .log-message {
+            color: #2c3e50;
+        }
+
+        .log-metadata {
+            color: #7f8c8d;
+            font-size: 11px;
+            margin-top: 4px;
+            padding-left: 20px;
+        }
+
+        .no-logs {
+            text-align: center;
+            padding: 40px;
+            color: #7f8c8d;
+            font-style: italic;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #3498db;
+        }
+
+        .error-message {
+            background-color: #e74c3c;
+            color: white;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+
+        .stats-summary {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .stat-card {
+            background: #ecf0f1;
+            padding: 10px 15px;
+            border-radius: 4px;
+            text-align: center;
+            flex: 1;
+        }
+
+        .stat-number {
+            font-size: 18px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #7f8c8d;
+        }
+
+        @media (max-width: 768px) {
+            .controls-row {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .control-group {
+                width: 100%;
+            }
+
+            .stats-summary {
+                flex-direction: column;
+            }
+
+            .header {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📋 システムログ</h1>
+            <div class="nav-links">
+                <a href="/admin/channel/edit">チャンネル管理</a>
+                <a href="/" target="_blank">メインページ</a>
+                <button onclick="logout()" style="background: #e74c3c; border: none; color: white; padding: 8px 16px; border-radius: 4px; cursor: pointer;">ログアウト</button>
+            </div>
+        </div>
+
+        <div id="errorMessage" class="error-message" style="display: none;"></div>
+
+        <div class="controls">
+            <div class="stats-summary" id="statsSummary" style="display: none;">
+                <div class="stat-card">
+                    <div class="stat-number" id="totalLogs">-</div>
+                    <div class="stat-label">総ログ数</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="announcements">-</div>
+                    <div class="stat-label">アナウンス数</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="errors">-</div>
+                    <div class="stat-label">エラー数</div>
+                </div>
+            </div>
+
+            <div class="controls-row">
+                <div class="control-group">
+                    <label>表示件数</label>
+                    <select id="limitSelect">
+                        <option value="50">50件</option>
+                        <option value="100" selected>100件</option>
+                        <option value="200">200件</option>
+                        <option value="500">500件</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label>ログレベル</label>
+                    <select id="levelFilter">
+                        <option value="">すべて</option>
+                        <option value="ERROR">エラー</option>
+                        <option value="WARN">警告</option>
+                        <option value="INFO">情報</option>
+                        <option value="DEBUG">デバッグ</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label>ログタイプ</label>
+                    <select id="typeFilter">
+                        <option value="">すべて</option>
+                        <option value="ANNOUNCEMENT">アナウンス</option>
+                        <option value="CONNECTION">接続</option>
+                        <option value="AUTHENTICATION">認証</option>
+                        <option value="CHANNEL">チャンネル</option>
+                        <option value="SYSTEM">システム</option>
+                        <option value="ERROR">エラー</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label>&nbsp;</label>
+                    <button onclick="loadLogs()" class="refresh-btn">🔄 更新</button>
+                </div>
+                <div class="control-group">
+                    <label>&nbsp;</label>
+                    <button onclick="clearDisplay()" class="clear-btn">🗑️ 画面クリア</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="log-container">
+            <div class="log-header">
+                <span id="logTitle">システムログ (最新100件)</span>
+                <span style="float: right; font-size: 12px;" id="lastUpdate">-</span>
+            </div>
+            <div class="log-content" id="logContent">
+                <div class="loading">ログを読み込み中...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentLogs = [];
+        let autoRefresh = false;
+        let refreshInterval = null;
+
+        // 認証チェック
+        async function checkAuth() {
+            try {
+                const response = await fetch('/admin/api/auth-status');
+                const data = await response.json();
+                if (!data.isAuthenticated) {
+                    window.location.href = '/admin/channel/edit';
+                    return false;
+                }
+                return true;
+            } catch (error) {
+                console.error('認証チェックエラー:', error);
+                return false;
+            }
+        }
+
+        // ログアウト
+        async function logout() {
+            try {
+                await fetch('/admin/logout', { method: 'POST' });
+                window.location.href = '/admin/channel/edit';
+            } catch (error) {
+                console.error('ログアウトエラー:', error);
+            }
+        }
+
+        // ログ読み込み
+        async function loadLogs() {
+            if (!await checkAuth()) return;
+
+            const limit = document.getElementById('limitSelect').value;
+            const logContent = document.getElementById('logContent');
+            const errorMessage = document.getElementById('errorMessage');
+            
+            logContent.innerHTML = '<div class="loading">ログを読み込み中...</div>';
+            errorMessage.style.display = 'none';
+
+            try {
+                const response = await fetch(`/admin/api/logs?limit=${limit}`);
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const logs = await response.json();
+                currentLogs = logs;
+                displayLogs(logs);
+                updateStats();
+                
+                document.getElementById('lastUpdate').textContent = 
+                    `最終更新: ${new Date().toLocaleTimeString('ja-JP')}`;
+                
+            } catch (error) {
+                console.error('ログ読み込みエラー:', error);
+                errorMessage.textContent = `ログの読み込みに失敗しました: ${error.message}`;
+                errorMessage.style.display = 'block';
+                logContent.innerHTML = '<div class="no-logs">ログの読み込みに失敗しました</div>';
+            }
+        }
+
+        // ログ表示
+        function displayLogs(logs) {
+            const logContent = document.getElementById('logContent');
+            const levelFilter = document.getElementById('levelFilter').value;
+            const typeFilter = document.getElementById('typeFilter').value;
+            const limit = document.getElementById('limitSelect').value;
+
+            // フィルタリング
+            let filteredLogs = logs;
+            if (levelFilter) {
+                filteredLogs = filteredLogs.filter(log => log.level === levelFilter);
+            }
+            if (typeFilter) {
+                filteredLogs = filteredLogs.filter(log => log.type === typeFilter);
+            }
+
+            document.getElementById('logTitle').textContent = 
+                `システムログ (${filteredLogs.length}/${logs.length}件表示)`;
+
+            if (filteredLogs.length === 0) {
+                logContent.innerHTML = '<div class="no-logs">表示するログがありません</div>';
+                return;
+            }
+
+            const logHtml = filteredLogs.map(log => {
+                const metadata = log.metadata && Object.keys(log.metadata).length > 0 
+                    ? `<div class="log-metadata">${JSON.stringify(log.metadata, null, 2)}</div>`
+                    : '';
+                
+                return `
+                    <div class="log-entry">
+                        <span class="log-timestamp">${log.timestamp}</span>
+                        <span class="log-level ${log.level}">${log.level}</span>
+                        <span class="log-type">${log.type}</span>
+                        <span class="log-message">${escapeHtml(log.message)}</span>
+                        ${metadata}
+                    </div>
+                `;
+            }).join('');
+
+            logContent.innerHTML = logHtml;
+        }
+
+        // 統計更新
+        function updateStats() {
+            const totalLogs = currentLogs.length;
+            const announcements = currentLogs.filter(log => log.type === 'ANNOUNCEMENT').length;
+            const errors = currentLogs.filter(log => log.level === 'ERROR').length;
+
+            document.getElementById('totalLogs').textContent = totalLogs;
+            document.getElementById('announcements').textContent = announcements;
+            document.getElementById('errors').textContent = errors;
+            document.getElementById('statsSummary').style.display = 'flex';
+        }
+
+        // 画面クリア
+        function clearDisplay() {
+            document.getElementById('logContent').innerHTML = '<div class="no-logs">ログをクリアしました</div>';
+            document.getElementById('statsSummary').style.display = 'none';
+            document.getElementById('lastUpdate').textContent = '-';
+        }
+
+        // HTMLエスケープ
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // イベントリスナー
+        document.getElementById('limitSelect').addEventListener('change', () => {
+            if (currentLogs.length > 0) {
+                displayLogs(currentLogs);
+            }
+        });
+
+        document.getElementById('levelFilter').addEventListener('change', () => {
+            if (currentLogs.length > 0) {
+                displayLogs(currentLogs);
+            }
+        });
+
+        document.getElementById('typeFilter').addEventListener('change', () => {
+            if (currentLogs.length > 0) {
+                displayLogs(currentLogs);
+            }
+        });
+
+        // 初期化
+        document.addEventListener('DOMContentLoaded', () => {
+            loadLogs();
+            
+            // 30秒ごとに自動更新
+            setInterval(() => {
+                if (document.visibilityState === 'visible') {
+                    loadLogs();
+                }
+            }, 30000);
+        });
+    </script>
+</body>
+</html>
