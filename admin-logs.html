@@ -119,6 +119,15 @@
             background-color: #c0392b;
         }
 
+        .auto-refresh-btn {
+            background-color: #27ae60;
+            transition: background-color 0.3s ease;
+        }
+
+        .auto-refresh-btn:hover {
+            background-color: #229954;
+        }
+
         .log-container {
             background: white;
             border-radius: 8px;
@@ -152,6 +161,78 @@
 
         .log-entry:last-child {
             border-bottom: none;
+        }
+
+        /* チャンネル別タブスタイル */
+        .channel-tabs {
+            display: flex;
+            background-color: #f8f9fa;
+            border-bottom: 2px solid #dee2e6;
+            margin-bottom: 0;
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+
+        .channel-tab {
+            padding: 12px 20px;
+            background-color: transparent;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            color: #6c757d;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+            min-width: 120px;
+            position: relative;
+        }
+
+        .channel-tab:hover {
+            background-color: #e9ecef;
+            color: #495057;
+        }
+
+        .channel-tab.active {
+            color: #3498db;
+            border-bottom-color: #3498db;
+            background-color: white;
+        }
+
+        .channel-tab .tab-badge {
+            display: inline-block;
+            background-color: #dc3545;
+            color: white;
+            border-radius: 10px;
+            padding: 2px 6px;
+            font-size: 10px;
+            margin-left: 8px;
+            min-width: 16px;
+            text-align: center;
+        }
+
+        .channel-tab.active .tab-badge {
+            background-color: #3498db;
+        }
+
+        /* ログエントリの色分け */
+        .log-entry.connection-connect {
+            border-left: 4px solid #27ae60;
+            background-color: #f8fff9;
+        }
+
+        .log-entry.connection-disconnect {
+            border-left: 4px solid #e74c3c;
+            background-color: #fff8f8;
+        }
+
+        .log-entry.announcement {
+            border-left: 4px solid #f39c12;
+            background-color: #fffbf5;
+        }
+
+        .log-entry.error {
+            border-left: 4px solid #e74c3c;
+            background-color: #fff5f5;
         }
 
         .log-timestamp {
@@ -349,12 +430,23 @@
                 </div>
                 <div class="control-group">
                     <label>&nbsp;</label>
+                    <button onclick="toggleAutoRefresh()" class="auto-refresh-btn" style="background-color: #27ae60;">🔄 自動更新: ON</button>
+                </div>
+                <div class="control-group">
+                    <label>&nbsp;</label>
                     <button onclick="clearDisplay()" class="clear-btn">🗑️ 画面クリア</button>
                 </div>
             </div>
         </div>
 
         <div class="log-container">
+            <!-- チャンネル別タブ -->
+            <div class="channel-tabs" id="channelTabs">
+                <button class="channel-tab active" data-channel="all">
+                    すべて <span class="tab-badge" id="badge-all">0</span>
+                </button>
+            </div>
+
             <div class="log-header">
                 <span id="logTitle">システムログ (最新100件)</span>
                 <span style="float: right; font-size: 12px;" id="lastUpdate">-</span>
@@ -367,8 +459,11 @@
 
     <script>
         let currentLogs = [];
-        let autoRefresh = false;
+        let autoRefresh = true;
         let refreshInterval = null;
+        let currentChannel = 'all';
+        let channelStats = {};
+        let lastLogCount = 0;
 
         // 認証チェック
         async function checkAuth() {
@@ -414,11 +509,25 @@
                 }
 
                 const logs = await response.json();
+
+                // 新しいログがあるかチェック
+                const hasNewLogs = logs.length > lastLogCount;
+                lastLogCount = logs.length;
+
                 currentLogs = logs;
-                displayLogs(logs);
+                await displayLogs(logs);
                 updateStats();
-                
-                document.getElementById('lastUpdate').textContent = 
+
+                // 新しいログがある場合の視覚的フィードバック
+                if (hasNewLogs && autoRefresh) {
+                    const logHeader = document.querySelector('.log-header');
+                    logHeader.style.backgroundColor = '#27ae60';
+                    setTimeout(() => {
+                        logHeader.style.backgroundColor = '#34495e';
+                    }, 1000);
+                }
+
+                document.getElementById('lastUpdate').textContent =
                     `最終更新: ${new Date().toLocaleTimeString('ja-JP')}`;
                 
             } catch (error) {
@@ -430,23 +539,43 @@
         }
 
         // ログ表示
-        function displayLogs(logs) {
+        async function displayLogs(logs) {
             const logContent = document.getElementById('logContent');
             const levelFilter = document.getElementById('levelFilter').value;
             const typeFilter = document.getElementById('typeFilter').value;
             const limit = document.getElementById('limitSelect').value;
 
+            // チャンネル別タブを更新
+            await updateChannelTabs(logs);
+
             // フィルタリング
             let filteredLogs = logs;
+
+            // チャンネルフィルタ
+            if (currentChannel !== 'all') {
+                filteredLogs = filteredLogs.filter(log =>
+                    log.metadata && log.metadata.channelName === currentChannel
+                );
+            } else {
+                // 「すべて」の場合でも「システム」チャンネルは除外
+                filteredLogs = filteredLogs.filter(log =>
+                    !log.metadata || !log.metadata.channelName || log.metadata.channelName !== 'システム'
+                );
+            }
+
+            // レベルフィルタ
             if (levelFilter) {
                 filteredLogs = filteredLogs.filter(log => log.level === levelFilter);
             }
+
+            // タイプフィルタ
             if (typeFilter) {
                 filteredLogs = filteredLogs.filter(log => log.type === typeFilter);
             }
 
-            document.getElementById('logTitle').textContent = 
-                `システムログ (${filteredLogs.length}/${logs.length}件表示)`;
+            const channelText = currentChannel === 'all' ? 'すべて' : `チャンネル「${currentChannel}」`;
+            document.getElementById('logTitle').textContent =
+                `${channelText}のログ (${filteredLogs.length}/${logs.length}件表示)`;
 
             if (filteredLogs.length === 0) {
                 logContent.innerHTML = '<div class="no-logs">表示するログがありません</div>';
@@ -454,12 +583,24 @@
             }
 
             const logHtml = filteredLogs.map(log => {
-                const metadata = log.metadata && Object.keys(log.metadata).length > 0 
+                const metadata = log.metadata && Object.keys(log.metadata).length > 0
                     ? `<div class="log-metadata">${JSON.stringify(log.metadata, null, 2)}</div>`
                     : '';
-                
+
+                // ログエントリのクラスを決定（色分け用）
+                let entryClass = 'log-entry';
+                if (log.type === 'CONNECTION' && log.metadata && log.metadata.action === 'connect') {
+                    entryClass += ' connection-connect';
+                } else if (log.type === 'CONNECTION' && log.metadata && log.metadata.action === 'disconnect') {
+                    entryClass += ' connection-disconnect';
+                } else if (log.type === 'ANNOUNCEMENT') {
+                    entryClass += ' announcement';
+                } else if (log.level === 'ERROR') {
+                    entryClass += ' error';
+                }
+
                 return `
-                    <div class="log-entry">
+                    <div class="${entryClass}">
                         <span class="log-timestamp">${log.timestamp}</span>
                         <span class="log-level ${log.level}">${log.level}</span>
                         <span class="log-type">${log.type}</span>
@@ -470,6 +611,76 @@
             }).join('');
 
             logContent.innerHTML = logHtml;
+        }
+
+        // チャンネルタブ更新
+        async function updateChannelTabs(logs) {
+            const channelTabs = document.getElementById('channelTabs');
+
+            // 実際のチャンネル一覧を取得
+            let validChannels = [];
+            try {
+                const response = await fetch('/admin/api/channels');
+                if (response.ok) {
+                    const channelsData = await response.json();
+                    validChannels = channelsData.map(ch => ch.name);
+                }
+            } catch (error) {
+                console.error('チャンネル一覧の取得に失敗:', error);
+            }
+
+            // チャンネル別統計を計算（有効なチャンネルのみ）
+            channelStats = { all: logs.length };
+            logs.forEach(log => {
+                if (log.metadata && log.metadata.channelName) {
+                    const channel = log.metadata.channelName;
+                    // 有効なチャンネルのみカウント（「システム」は除外）
+                    if (validChannels.includes(channel) && channel !== 'システム') {
+                        channelStats[channel] = (channelStats[channel] || 0) + 1;
+                    }
+                }
+            });
+
+            // 既存のタブをクリア（「すべて」タブ以外）
+            const allTab = channelTabs.querySelector('[data-channel="all"]');
+            channelTabs.innerHTML = '';
+            channelTabs.appendChild(allTab);
+
+            // 「すべて」タブのバッジを更新
+            document.getElementById('badge-all').textContent = channelStats.all;
+
+            // 有効なチャンネルのみタブを作成
+            validChannels.sort().forEach(channel => {
+                const count = channelStats[channel] || 0;
+                if (count > 0) { // ログがあるチャンネルのみ表示
+                    const tab = document.createElement('button');
+                    tab.className = 'channel-tab';
+                    tab.setAttribute('data-channel', channel);
+                    tab.innerHTML = `${channel} <span class="tab-badge">${count}</span>`;
+                    tab.addEventListener('click', async () => await switchChannel(channel));
+                    channelTabs.appendChild(tab);
+                }
+            });
+
+            // 現在のタブをアクティブに
+            updateActiveTab();
+        }
+
+        // アクティブタブの更新
+        function updateActiveTab() {
+            document.querySelectorAll('.channel-tab').forEach(tab => {
+                tab.classList.remove('active');
+                if (tab.getAttribute('data-channel') === currentChannel) {
+                    tab.classList.add('active');
+                }
+            });
+        }
+
+        // チャンネル切り替え
+        async function switchChannel(channel) {
+            currentChannel = channel;
+            updateActiveTab();
+            await displayLogs(currentLogs);
         }
 
         // 統計更新
@@ -499,34 +710,49 @@
         }
 
         // イベントリスナー
-        document.getElementById('limitSelect').addEventListener('change', () => {
+        document.getElementById('limitSelect').addEventListener('change', async () => {
             if (currentLogs.length > 0) {
-                displayLogs(currentLogs);
+                await displayLogs(currentLogs);
             }
         });
 
-        document.getElementById('levelFilter').addEventListener('change', () => {
+        document.getElementById('levelFilter').addEventListener('change', async () => {
             if (currentLogs.length > 0) {
-                displayLogs(currentLogs);
+                await displayLogs(currentLogs);
             }
         });
 
-        document.getElementById('typeFilter').addEventListener('change', () => {
+        document.getElementById('typeFilter').addEventListener('change', async () => {
             if (currentLogs.length > 0) {
-                displayLogs(currentLogs);
+                await displayLogs(currentLogs);
             }
         });
 
         // 初期化
         document.addEventListener('DOMContentLoaded', () => {
+            // 「すべて」タブのイベントリスナーを追加
+            document.querySelector('[data-channel="all"]').addEventListener('click', async () => {
+                await switchChannel('all');
+            });
+
             loadLogs();
-            
-            // 30秒ごとに自動更新
+
+            // 5秒ごとに自動更新（リアルタイム感を向上）
             setInterval(() => {
-                if (document.visibilityState === 'visible') {
+                if (document.visibilityState === 'visible' && autoRefresh) {
                     loadLogs();
                 }
-            }, 30000);
+            }, 5000);
+
+            // 自動更新の切り替え機能
+            window.toggleAutoRefresh = function() {
+                autoRefresh = !autoRefresh;
+                const button = document.querySelector('.auto-refresh-btn');
+                if (button) {
+                    button.textContent = autoRefresh ? '🔄 自動更新: ON' : '⏸️ 自動更新: OFF';
+                    button.style.backgroundColor = autoRefresh ? '#27ae60' : '#95a5a6';
+                }
+            };
         });
     </script>
 </body>
