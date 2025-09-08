@@ -172,6 +172,51 @@ button:active,.page-button:active {
         box-shadow: none;
 }
 
+/* アナウンス実行ボタン */
+.announce-buttons {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+    align-items: center;
+}
+
+.announce-btn {
+    padding: 8px 16px;
+    margin-right: 10px;
+    margin-bottom: 5px;
+    cursor: pointer;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-round);
+    background-color: var(--button-bg);
+    color: var(--button-text);
+    font-size: 0.9em;
+    font-weight: 500;
+    transition: transform 0.15s ease-out, background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: var(--box-shadow-light);
+}
+
+.announce-btn:hover {
+    background-color: var(--button-hover-bg);
+    color: var(--button-hover-text);
+    border-color: var(--button-hover-bg);
+    transform: translateY(-2px) rotate(1deg);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
+}
+
+.announce-btn:active {
+    transform: translateY(0) rotate(0);
+    box-shadow: var(--box-shadow-light);
+}
+
+.announce-btn:disabled {
+    background-color: #ccc;
+    color: #666;
+    border-color: #ccc;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
 
 /* ステータスメッセージ */
 #announcement-status, #create-channel-status {

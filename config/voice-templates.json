@@ -1,0 +1,14 @@
+{
+  "japanese": {
+    "ticketTemplate": "呼び出し番号 {number}番のかた",
+    "roomTemplate": "{number}番診察室へお越しください。",
+    "receptionTemplate": "受付にお越しください。",
+    "description": "日本語音声のテンプレート設定"
+  },
+  "english": {
+    "ticketTemplate": "Patient number {number}",
+    "roomTemplate": "Please come to room {number}",
+    "receptionTemplate": "Please come to the reception desk",
+    "description": "English voice template settings"
+  }
+}

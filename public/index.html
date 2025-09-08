@@ -44,7 +44,15 @@
                 <input type="text" id="ticketNumber" inputmode="numeric" pattern="[0-9]*" required>
             </div>
             <!-- 3. アナウンス送信 -->
-            <button id="announceButton">アナウンス開始</button>
+            <div class="announce-buttons">
+                <label for="announceLabel">アナウンス開始</label>
+                <button id="announceJapaneseButton" class="announce-btn japanese-btn" onclick="announceWithLanguage('japanese')">
+                    日本語
+                </button>
+                <button id="announceEnglishButton" class="announce-btn english-btn" onclick="announceWithLanguage('english')">
+                    英語
+                </button>
+            </div>
             <div id="announcement-status"></div>
         </div>
     </div>

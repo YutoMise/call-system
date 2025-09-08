@@ -12,7 +12,7 @@ const { logger, readLogs, getLogStats } = require('./utils/logManager');
 
 
 const app = express();
-const PORT = 3002;
+const PORT = process.env.PORT || 3002;
 const CHANNELS_FILE = path.join(__dirname, 'channels.json');
 
 let channels = [];
@@ -141,6 +141,39 @@ app.post('/api/update-speaker-gender', async (req, res) => {
     } catch (error) {
         console.error('性別更新エラー:', error);
         res.status(500).json({ error: '内部サーバーエラー' });
+    }
+});
+
+// 音声テンプレート設定API
+app.get('/api/voice-templates', async (req, res) => {
+    try {
+        const templatesPath = path.join(__dirname, 'config/voice-templates.json');
+        
+        if (!await fs.access(templatesPath).then(() => true).catch(() => false)) {
+            // フォールバック用のデフォルトテンプレート
+            const defaultTemplates = {
+                japanese: {
+                    ticketTemplate: "呼び出し番号 {number}番のかた",
+                    roomTemplate: "{number}番診察室へお越しください。",
+                    receptionTemplate: "受付にお越しください。",
+                    description: "日本語音声のテンプレート設定（デフォルト）"
+                },
+                english: {
+                    ticketTemplate: "Patient number {number}",
+                    roomTemplate: "Please come to room {number}",
+                    receptionTemplate: "Please come to the reception desk",
+                    description: "English voice template settings (default)"
+                }
+            };
+            return res.json(defaultTemplates);
+        }
+        
+        const data = await fs.readFile(templatesPath, 'utf8');
+        const templates = JSON.parse(data);
+        res.json(templates);
+    } catch (error) {
+        console.error('音声テンプレート設定の読み込みに失敗:', error);
+        res.status(500).json({ error: 'Failed to load voice templates' });
     }
 });
 
@@ -325,7 +358,7 @@ app.post('/api/unsubscribe', (req, res) => {
 
 // POST /api/announce
 app.post('/api/announce', async (req, res) => {
-    const { channelName, password, ticketNumber, roomNumber } = req.body;
+    const { channelName, password, ticketNumber, roomNumber, language = 'japanese' } = req.body;
     const channel = channels.find(c => c.name === channelName);
 
     if (!channel) {
@@ -336,12 +369,30 @@ app.post('/api/announce', async (req, res) => {
 
     if (isPasswordValid) {
         if (channelName && ticketNumber && roomNumber) {
-            const announcementData = { ticketNumber, roomNumber };
+            // 言語に応じた音声設定を取得
+            let voiceConfig = null;
+            if (channel.voiceConfig && channel.voiceConfig[language]) {
+                voiceConfig = channel.voiceConfig[language];
+            } else {
+                // フォールバック: 古い形式のvoiceIdを使用
+                voiceConfig = {
+                    type: 'voicevox',
+                    voiceId: channel.voiceId || 'voice1',
+                    speakerId: 1
+                };
+            }
+            
+            const announcementData = { 
+                ticketNumber, 
+                roomNumber, 
+                language,
+                voiceConfig 
+            };
             const clientCount = activeClients[channelName] ? activeClients[channelName].length : 0;
             sendEventToChannel(channelName, 'play-announcement', announcementData);
 
-            await logger.announcement(channelName, ticketNumber, roomNumber, clientCount);
-            res.json({ message: 'アナウンスを送信しました。' });
+            await logger.announcement(channelName, ticketNumber, roomNumber, clientCount, { language, voiceType: voiceConfig.type });
+            res.json({ message: `アナウンスを送信しました（${language === 'japanese' ? '日本語' : '英語'}）。` });
         } else {
              res.status(400).json({ message: 'アナウンス情報が不足しています。' });
         }
@@ -492,6 +543,51 @@ app.get('/admin/api/auth-status', (req, res) => {
     res.json({ isAuthenticated: !!req.session.isAdmin });
 });
 
+// 事前生成音声リスト取得API（管理者用）
+app.get('/admin/api/pregenerated-voices', requireAdminAuth, async (req, res) => {
+    try {
+        // public/audio/pregenerated ディレクトリを基準にする
+        const baseDir = path.join(__dirname, 'public', 'audio', 'pregenerated');
+        
+        const readVoicesFrom = async (langDir) => {
+            const dirPath = path.join(baseDir, langDir);
+            try {
+                // ディレクトリの存在チェック
+                await fs.access(dirPath);
+                const entries = await fs.readdir(dirPath, { withFileTypes: true });
+                return entries
+                    .filter(entry => entry.isDirectory())
+                    .map(entry => entry.name)
+                    .sort();
+            } catch (error) {
+                // ディレクトリが存在しない場合は警告をログに出力し、空配列を返す
+                if (error.code === 'ENOENT') {
+                    await logger.warn(`Directory not found: ${dirPath}`);
+                    return [];
+                }
+                throw error; // その他のエラーは再スロー
+            }
+        };
+
+        const japaneseVoices = await readVoicesFrom('japanese');
+        const englishVoices = await readVoicesFrom('english');
+
+        res.json({
+            success: true,
+            japanese: japaneseVoices,
+            english: englishVoices
+        });
+
+    } catch (error) {
+        console.error('Error reading pregenerated directory:', error);
+        await logger.error('事前生成音声リストの読み込みに失敗', {
+            message: error.message,
+            stack: error.stack
+        });
+        res.status(500).json({ success: false, message: 'Failed to get voice list.' });
+    }
+});
+
 // ログ取得API（管理者用）
 app.get('/admin/api/logs', requireAdminAuth, async (req, res) => {
     try {
@@ -541,6 +637,223 @@ function sendEventToChannel(channelName, eventName, data) {
 // --- 静的HTMLルート ---
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));
 app.get('/receiver', (req, res) => res.sendFile(path.join(__dirname, 'public', 'receiver.html')));
+
+
+// --- チャンネル管理API ---
+
+// チャンネル設定一覧を取得
+app.get('/api/channels-config', async (req, res) => {
+    try {
+        res.json(channels);
+    } catch (error) {
+        console.error('チャンネル設定取得エラー:', error);
+        res.status(500).json({ error: 'チャンネル設定の取得に失敗しました' });
+    }
+});
+
+// 個別チャンネル設定を更新
+app.put('/api/channels-config/:index', async (req, res) => {
+    try {
+        const index = parseInt(req.params.index);
+        const channelData = req.body;
+        
+        if (index < 0 || index >= channels.length) {
+            return res.status(404).json({ error: '指定されたチャンネルが見つかりません' });
+        }
+        
+        // バリデーション
+        if (!channelData.name || !channelData.password) {
+            return res.status(400).json({ error: 'チャンネル名とパスワードは必須です' });
+        }
+        
+        // チャンネル設定を更新
+        channels[index] = channelData;
+        
+        // ファイルに保存
+        await fs.writeFile(CHANNELS_FILE, JSON.stringify(channels, null, 2));
+        await logger.channel('update', channelData.name, { 
+            channelIndex: index, 
+            roomCount: channelData.roomCount,
+            useReception: channelData.useReception,
+            voiceConfigUpdated: true
+        });
+        
+        res.json({ message: 'チャンネル設定を更新しました', channel: channelData });
+        
+    } catch (error) {
+        console.error('チャンネル更新エラー:', error);
+        res.status(500).json({ error: 'チャンネル設定の更新に失敗しました' });
+    }
+});
+
+// チャンネルを削除
+app.delete('/api/channels-config/:index', async (req, res) => {
+    try {
+        const index = parseInt(req.params.index);
+        
+        if (index < 0 || index >= channels.length) {
+            return res.status(404).json({ error: '指定されたチャンネルが見つかりません' });
+        }
+        
+        const deletedChannel = channels[index];
+        channels.splice(index, 1);
+        
+        // ファイルに保存
+        await fs.writeFile(CHANNELS_FILE, JSON.stringify(channels, null, 2));
+        await logger.channel('delete', deletedChannel.name, { channelIndex: index });
+        
+        res.json({ message: 'チャンネルを削除しました', deletedChannel });
+        
+    } catch (error) {
+        console.error('チャンネル削除エラー:', error);
+        res.status(500).json({ error: 'チャンネルの削除に失敗しました' });
+    }
+});
+
+// チャンネルテスト
+app.post('/api/test-channel', async (req, res) => {
+    try {
+        const { channelName } = req.body;
+        const channel = channels.find(c => c.name === channelName);
+        
+        if (!channel) {
+            return res.status(404).json({ error: 'チャンネルが見つかりません' });
+        }
+        
+        // テスト結果を返す
+        res.json({ 
+            message: 'チャンネルテストが完了しました',
+            channel: channelName,
+            config: {
+                roomCount: channel.roomCount,
+                useReception: channel.useReception,
+                hasVoiceConfig: !!channel.voiceConfig,
+                jaVoiceId: channel.voiceConfig?.japanese?.voiceId,
+                enVoiceId: channel.voiceConfig?.english?.voiceId
+            }
+        });
+        
+    } catch (error) {
+        console.error('チャンネルテストエラー:', error);
+        res.status(500).json({ error: 'チャンネルテストに失敗しました' });
+    }
+});
+
+// --- 音声管理API ---
+
+// Voicevox話者一覧を取得
+app.get('/api/voicevox-speakers', async (req, res) => {
+    try {
+        const dataPath = path.join(__dirname, 'data/voicevox-speakers.json');
+        const data = await fs.readFile(dataPath, 'utf8');
+        const speakers = JSON.parse(data);
+        res.json(speakers);
+    } catch (error) {
+        // フォールバック: 基本的な話者一覧
+        const fallbackSpeakers = [
+            { id: 0, name: "四国めたん（ノーマル）" },
+            { id: 1, name: "ずんだもん（ノーマル）" },
+            { id: 8, name: "春日部つむぎ（ノーマル）" },
+            { id: 14, name: "冥鳴ひまり（ノーマル）" }
+        ];
+        res.json(fallbackSpeakers);
+    }
+});
+
+// Kokoro音声一覧を取得
+app.get('/api/kokoro-voices', async (req, res) => {
+    try {
+        const dataPath = path.join(__dirname, 'data/kokoro-voices.json');
+        const data = await fs.readFile(dataPath, 'utf8');
+        const voices = JSON.parse(data);
+        res.json(voices);
+    } catch (error) {
+        // フォールバック: 基本的な音声一覧
+        const fallbackVoices = [
+            { id: 'af_bella', name: 'Bella (Female, American)' },
+            { id: 'af_sarah', name: 'Sarah (Female, American)' },
+            { id: 'am_adam', name: 'Adam (Male, American)' },
+            { id: 'bf_emma', name: 'Emma (Female, British)' }
+        ];
+        res.json(fallbackVoices);
+    }
+});
+
+// 音声テスト（Voicevox）
+app.post('/api/test-voice/voicevox', async (req, res) => {
+    const { text, speakerId, pitch = 0.0, speed = 1.0 } = req.body;
+    
+    try {
+        const fetch = require('node-fetch');
+        const VOICEVOX_API_URL = process.env.VOICEVOX_URL || 'http://localhost:50021';
+        
+        // 1. audio_query
+        const audioQueryResponse = await fetch(
+            `${VOICEVOX_API_URL}/audio_query?text=${encodeURIComponent(text)}&speaker=${speakerId}`,
+            { method: 'POST', headers: { 'Accept': 'application/json' } }
+        );
+        
+        if (!audioQueryResponse.ok) {
+            throw new Error(`audio_query failed: ${audioQueryResponse.status}`);
+        }
+        
+        const audioQuery = await audioQueryResponse.json();
+        audioQuery.pitchScale = pitch;
+        audioQuery.speedScale = speed;
+        
+        // 2. synthesis
+        const synthesisResponse = await fetch(
+            `${VOICEVOX_API_URL}/synthesis?speaker=${speakerId}`,
+            {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Accept': 'audio/wav' },
+                body: JSON.stringify(audioQuery)
+            }
+        );
+        
+        if (!synthesisResponse.ok) {
+            throw new Error(`synthesis failed: ${synthesisResponse.status}`);
+        }
+        
+        const audioBuffer = await synthesisResponse.arrayBuffer();
+        
+        res.setHeader('Content-Type', 'audio/wav');
+        res.send(Buffer.from(audioBuffer));
+        
+    } catch (error) {
+        console.error('Voicevox test error:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// 音声テスト（Kokoro）
+app.post('/api/test-voice/kokoro', async (req, res) => {
+    const { text, voiceId } = req.body;
+    
+    try {
+        const fetch = require('node-fetch');
+        const KOKORO_TTS_URL = process.env.KOKORO_TTS_URL || 'http://kokoro_tts:8880';
+        
+        const response = await fetch(`${KOKORO_TTS_URL}/tts`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text, voice: voiceId })
+        });
+        
+        if (!response.ok) {
+            throw new Error(`Kokoro TTS failed: ${response.status}`);
+        }
+        
+        const audioBuffer = await response.arrayBuffer();
+        
+        res.setHeader('Content-Type', 'audio/wav');
+        res.send(Buffer.from(audioBuffer));
+        
+    } catch (error) {
+        console.error('Kokoro test error:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
 
 
 async function startServer() {

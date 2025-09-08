@@ -16,17 +16,9 @@
 
     RUN npx terser index.js --compress --mangle --format comments=false -o index.js
     
-    RUN find public/js -type f -name '*.js' -print0 | xargs -0 -n 1 -I {} sh -c 'echo "Tersering {}" && npx terser "{}" --compress --mangle --format comments=false -o "{}"'
-    
-    RUN if [ -n "$(find routes -type f -name '*.js' 2>/dev/null)" ]; then \
-            find routes -type f -name '*.js' -print0 | xargs -0 -n 1 -I {} sh -c 'echo "Tersering {}" && npx terser "{}" --compress --mangle --format comments=false -o "{}"'; \
-        fi
-
-    RUN if [ -n "$(find utils -type f -name '*.js' 2>/dev/null)" ]; then \
-            find utils -type f -name '*.js' -print0 | xargs -0 -n 1 -I {} sh -c 'echo "Tersering {}" && npx terser "{}" --compress --mangle --format comments=false -o "{}"'; \
-        fi
-
-
+    # public/js, routes, utils 内の .js ファイルを terser で一括して圧縮・難読化
+    # 存在しないディレクトリがあってもエラーにならないように 2>/dev/null を追加
+    RUN find public/js routes utils -type f -name '*.js' -print0 2>/dev/null | xargs -0 -n 1 -I {} sh -c 'echo "Tersering {}" && npx terser "{}" --compress --mangle --format comments=false -o "{}"'
 
     ARG OBFUSCATOR_OPTIONS="\
     --dead-code-injection true \
@@ -37,18 +29,13 @@
     RUN npx javascript-obfuscator public/js --output ./obfuscated_public_js ${OBFUSCATOR_OPTIONS}
     RUN rm -rf public/js
     RUN mv ./obfuscated_public_js public/js
-
-    RUN if [ -d "routes" ] && [ -n "$(find routes -type f -name '*.js' 2>/dev/null)" ]; then \
-            npx javascript-obfuscator routes --output ./obfuscated_routes ${OBFUSCATOR_OPTIONS} && \
-            rm -rf routes && \
-            mv ./obfuscated_routes routes; \
-        fi
-
-    RUN if [ -d "utils" ] && [ -n "$(find utils -type f -name '*.js' 2>/dev/null)" ]; then \
-            npx javascript-obfuscator utils --output ./obfuscated_utils ${OBFUSCATOR_OPTIONS} && \
-            rm -rf utils && \
-            mv ./obfuscated_utils utils; \
-        fi
+    
+    # routes と utils ディレクトリが存在すれば難読化（forループでまとめる）
+    RUN for dir in routes utils; do \
+          if [ -d "$dir" ] && [ -n "$(find "$dir" -type f -name '*.js' 2>/dev/null)" ]; then \
+            npx javascript-obfuscator "$dir" --output "./obfuscated_$dir" ${OBFUSCATOR_OPTIONS} && rm -rf "$dir" && mv "./obfuscated_$dir" "$dir"; \
+          fi; \
+        done
 
     # apiフォルダは難読化しない（samples.js用）
     # api フォルダはそのまま残す

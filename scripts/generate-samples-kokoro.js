@@ -3,10 +3,11 @@ const fs = require('node:fs');
 const path = require('node:path');
 const fetch = require('node-fetch');
 const { spawn } = require('node:child_process');
+const ffmpegPath = require('ffmpeg-static');
 
 require('dotenv').config({ path: path.join(__dirname, '../.env') });
 
-const KOKORO_TTS_API_URL = process.env.KOKORO_TTS_URL || 'http://localhost:8880';
+const KOKORO_TTS_API_URL = process.env.KOKORO_TTS_URL || 'http://kokoro_tts:8880';
 const OUTPUT_BASE_DIR = path.join(__dirname, '../public/audio/samples/english');
 const TARGET_FORMAT = 'mp3';
 const FFMPEG_BITRATE = '96k';
@@ -158,7 +159,8 @@ async function fetchAndSaveAudio(text, filename, voice, outputDir) {
 // ffmpegでMP3に変換する関数
 function convertToMp3(inputPath, outputPath) {
     return new Promise((resolve, reject) => {
-        const ffmpeg = spawn('ffmpeg', [
+        // const ffmpeg = spawn('ffmpeg', [
+        const ffmpeg = spawn(ffmpegPath, [
             '-i', inputPath,
             '-codec:a', 'libmp3lame',
             '-b:a', FFMPEG_BITRATE,

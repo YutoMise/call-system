@@ -273,10 +273,14 @@ function connectEventSource() {
                 return; // 処理を中断
             }
 
-             logMessage(`アナウンス受信 (チャンネル: ${currentSubscribedChannel}): 整理券 ${data.ticketNumber}, 診察室 ${data.roomNumber}`);
-             const textToSpeak = `呼び出し番号 ${data.ticketNumber}番のかた、 ${data.roomNumber}番診察室へお越しください。`;
-             // チケット番号と部屋番号を個別に渡す
-             speakText(textToSpeak, data.ticketNumber, data.roomNumber);
+            // 言語とvoiceConfigを取得
+            const language = data.language || 'japanese'; // デフォルトは日本語
+            const voiceConfig = data.voiceConfig;
+            
+            logMessage(`アナウンス受信 (チャンネル: ${currentSubscribedChannel}): 整理券 ${data.ticketNumber}, 診察室 ${data.roomNumber}, 言語: ${language}`);
+            const textToSpeak = `呼び出し番号 ${data.ticketNumber}番のかた、 ${data.roomNumber}番診察室へお越しください。`;
+            // チケット番号、部屋番号、言語、音声設定を渡す
+            speakText(textToSpeak, data.ticketNumber, data.roomNumber, language, voiceConfig);
          } catch (e) {
              logMessage(`アナウンスデータのJSON解析に失敗しました。エラー: ${e.message}`);
              console.error("Failed to parse announcement data:", event.data, e);
@@ -639,7 +643,7 @@ async function playAudioFile(audioFilePath, abortSignal) {
 }
 
 // 音声合成 (部品ごとのキャッシュと逐次再生に対応)
-async function speakText(fullText, ticketNumber, roomNumber) {
+async function speakText(fullText, ticketNumber, roomNumber, language = 'japanese', voiceConfig = null) {
     if (isSpeaking) {
         logMessage("既にアナウンスが再生中です。新しいアナウンスはスキップされます。");
         return;
@@ -657,16 +661,23 @@ async function speakText(fullText, ticketNumber, roomNumber) {
     currentAnnouncementAbortController = new AbortController();
     const abortSignal = currentAnnouncementAbortController.signal;
 
-    // 現在のチャンネルのvoiceIdに基づいて音声ファイルのパスを組み立てる
-    const voiceId = currentChannelInfo?.voiceId || 'voice1'; // デフォルトはvoice1
-    const voiceBasePath = `${PREGENERATED_AUDIO_BASE_PATH}${voiceId}/`;
+    // 言語別フォルダ構造に対応した音声ファイルのパス生成
+    let voiceId = 'voice1'; // デフォルト
+    if (voiceConfig && voiceConfig.voiceId) {
+        voiceId = voiceConfig.voiceId;
+    } else if (currentChannelInfo && currentChannelInfo.voiceId) {
+        voiceId = currentChannelInfo.voiceId;
+    }
+    
+    // 言語別フォルダ構造: /audio/pregenerated/{language}/{voiceId}/
+    const voiceBasePath = `${PREGENERATED_AUDIO_BASE_PATH}${language}/${voiceId}/`;
 
     const segmentsToPlay = [
         `${voiceBasePath}ticket_${ticketNumber}.mp3`,
         `${voiceBasePath}room_${roomNumber}.mp3`
     ];
 
-    logMessage(`音声再生: voiceId=${voiceId}, チャンネル=${currentSubscribedChannel}`);
+    logMessage(`音声再生: language=${language}, voiceId=${voiceId}, チャンネル=${currentSubscribedChannel}`);
 
     // 無音再生中なら一時停止
     let wasSilentPlaying = isSilentAudioPlaying && silentAudioToggle.checked && currentSubscribedChannel;

@@ -1,7 +1,7 @@
 // /home/m41/call-system/scripts/generate-audio.js
 const fs = require('node:fs');
 require('dotenv').config({ path: require('node:path').join(__dirname, '../.env') }); // .envファイルを読み込む
-const { execSync } = require('node:child_process'); // ffmpeg実行のため追加
+const { spawnSync } = require('node:child_process'); // ffmpeg実行のため追加
 const path = require('node:path');
 // node-fetchのv3以降はESMのみサポートのため、package.jsonに "type": "module" を追加するか、
 // CommonJSで使えるv2系 (npm install node-fetch@2) をインストールしてください。
@@ -10,7 +10,7 @@ const ffmpegPath = require('ffmpeg-static');
 const fetch = require('node-fetch');
 
 const VOICEVOX_API_URL = process.env.VOICEVOX_URL || 'http://localhost:50021';
-const OUTPUT_BASE_DIR = path.join(__dirname, '../public/audio/pregenerated');
+const OUTPUT_BASE_DIR = path.join(__dirname, '../public/audio/pregenerated/japanese');
 const TARGET_FORMAT = 'mp3'; // 'mp3' または 'opus'
 const FFMPEG_BITRATE = '96k'; // ファイルサイズを考慮して少し下げる (例: 96k)
 const SPEAKERS_FILE_PATH = path.join(__dirname, '../data/voicevox-speakers.json');
@@ -210,8 +210,21 @@ async function fetchAndSaveAudio(text, baseFilename, speakerId, pitch, speed, ou
         // ffmpegで変換
         try {
             console.log(`ffmpegで ${TARGET_FORMAT} へ変換開始: ${wavFilename} -> ${targetFilename}`);
-            const ffmpegCommand = `"${ffmpegPath}" -i "${wavFilePath}" -y -vn -ar 44100 -ac 1 -b:a ${FFMPEG_BITRATE} "${targetFilePath}"`;
-            execSync(ffmpegCommand, { stdio: 'pipe' }); // stdio: 'pipe' でffmpegの出力を抑制
+            const ffmpegArgs = [
+                '-i', wavFilePath,
+                '-y',
+                '-vn',
+                '-ar', '44100',
+                '-ac', '1',
+                '-b:a', FFMPEG_BITRATE,
+                targetFilePath
+            ];
+            const result = spawnSync(ffmpegPath, ffmpegArgs, { stdio: 'pipe' });
+            if (result.status !== 0) {
+                const err = new Error(`ffmpeg exited with code ${result.status}`);
+                err.stderr = result.stderr;
+                throw err;
+            }
             console.log(`${TARGET_FORMAT}変換完了: ${targetFilename}`);
             fs.unlinkSync(wavFilePath); // 元のWAVファイルを削除
             console.log(`WAV削除完了: ${wavFilename}`);

@@ -1,6 +1,6 @@
 
 // --- DOM要素（DOMContentLoaded後に初期化） ---
-let ticketNumberInput, roomButtonsContainer, announceButton, announcementStatus;
+let ticketNumberInput, roomButtonsContainer, announceJapaneseButton, announceEnglishButton, announcementStatus;
 let channelBubble, channelBubbleText;
 let channelModal, modalChannelSelect, modalRefreshChannels, modalChannelPassword;
 let modalTestConnection, modalSaveChannel, modalClose, modalStatus;
@@ -16,7 +16,8 @@ function initializeDOM() {
     // メイン画面要素
     ticketNumberInput = document.getElementById('ticketNumber');
     roomButtonsContainer = document.getElementById('roomButtons');
-    announceButton = document.getElementById('announceButton');
+    announceJapaneseButton = document.getElementById('announceJapaneseButton');
+    announceEnglishButton = document.getElementById('announceEnglishButton');
     announcementStatus = document.getElementById('announcement-status');
 
     // チャンネル吹き出しボタン
@@ -70,6 +71,58 @@ function generateRoomButtons(roomCount, useReception) {
             selectedRoom = receptionButton.dataset.room; // 選択された部屋番号を保持
         });
         roomButtonsContainer.appendChild(receptionButton);
+    }
+}
+
+// 言語を指定してアナウンス実行
+async function announceWithLanguage(language) {
+    const ticketNumber = ticketNumberInput.value.trim();
+    const roomNumber = selectedRoom;
+
+    // 入力検証
+    if (!currentChannelName || !currentChannelPassword) {
+        announcementStatus.textContent = 'エラー: チャンネル設定が必要です。上のボタンから設定してください。';
+        announcementStatus.className = 'error';
+        return;
+    }
+    if (!ticketNumber || !roomNumber) {
+        announcementStatus.textContent = 'エラー: 整理券番号と診察室を入力/選択してください。';
+        announcementStatus.className = 'error';
+        return;
+    }
+
+    // ボタンを無効化
+    announceJapaneseButton.disabled = true;
+    announceEnglishButton.disabled = true;
+    
+    const languageText = language === 'japanese' ? '日本語' : '英語';
+    announcementStatus.textContent = `${languageText}でアナウンス送信中...`;
+    announcementStatus.className = '';
+
+    try {
+        const result = await apiCall('/api/announce', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                channelName: currentChannelName,
+                password: currentChannelPassword,
+                ticketNumber,
+                roomNumber,
+                language: language
+            })
+        });
+        
+        announcementStatus.textContent = result.message || `${languageText}でアナウンスを送信しました。`;
+        announcementStatus.className = 'success';
+        
+        setTimeout(() => announcementStatus.textContent = '', 5000);
+    } catch (error) {
+        announcementStatus.textContent = `送信エラー: ${error.message || 'サーバーとの通信に失敗しました。'}`;
+        announcementStatus.className = 'error';
+    } finally {
+        // ボタンを有効化
+        announceJapaneseButton.disabled = false;
+        announceEnglishButton.disabled = false;
     }
 }
 
@@ -431,57 +484,9 @@ function setupEventListeners() {
         });
     }
 
-    // アナウンスボタンのイベントリスナー
-    if (announceButton) {
-        announceButton.addEventListener('click', handleAnnounceClick);
-    }
+    // 新しいアナウンスボタンには onclick でイベントハンドラを設定済み
 }
 
-// アナウンス処理関数
-async function handleAnnounceClick(e) {
-    e.preventDefault();
-    const ticketNumber = ticketNumberInput.value;
-    const roomNumber = selectedRoom;
-
-    // --- 入力チェック ---
-    if (!currentChannelName || !currentChannelPassword) {
-        announcementStatus.textContent = 'エラー: チャンネル設定が必要です。上のボタンから設定してください。';
-        announcementStatus.className = 'error';
-        return;
-    }
-
-    if (!ticketNumber || !roomNumber) {
-        announcementStatus.textContent = 'エラー: 整理券番号と診察室を入力/選択してください。';
-        announcementStatus.className = 'error';
-        return;
-    }
-
-    announcementStatus.textContent = 'アナウンスを送信中...';
-    announcementStatus.className = ''; // ステータスクラスリセット
-
-    try {
-        const result = await apiCall('/api/announce', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                channelName: currentChannelName,
-                password: currentChannelPassword,
-                ticketNumber,
-                roomNumber
-            })
-        });
-        announcementStatus.textContent = result.message || 'アナウンスを送信しました。';
-        announcementStatus.className = 'success';
-            // フォームの内容をリセット (任意)
-            // ticketNumberInput.value = '';
-            // roomButtonsContainer.querySelectorAll('button').forEach(btn => btn.classList.remove('selected'));
-            // selectedRoom = null;
-        setTimeout(() => announcementStatus.textContent = '', 5000); // 少し長めに表示
-    } catch (error) {
-        announcementStatus.textContent = `送信エラー: ${error.message || 'サーバーとの通信に失敗しました。'}`;
-        announcementStatus.className = 'error';
-    }
-}
 
 // --- 初期化 ---
 // ページ読み込み時の初期化
