@@ -66,3 +66,6 @@ public/audio/
 # Settings that might contain sensitive data
 settings.json
 channels.json
+
+# CLAUDE.md
+CLAUDE.md
