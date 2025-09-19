@@ -571,11 +571,13 @@ app.get('/admin/api/pregenerated-voices', requireAdminAuth, async (req, res) => 
 
         const japaneseVoices = await readVoicesFrom('japanese');
         const englishVoices = await readVoicesFrom('english');
+        const chineseVoices = await readVoicesFrom('chinese');
 
         res.json({
             success: true,
             japanese: japaneseVoices,
-            english: englishVoices
+            english: englishVoices,
+            chinese: chineseVoices
         });
 
     } catch (error) {

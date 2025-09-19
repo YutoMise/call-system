@@ -16,7 +16,6 @@ services:
       - ./data:/app/data # データディレクトリを永続化
       - ./public:/app/public # publicディレクトリ全体をマウント（JSファイルの変更を反映）
       - ./logs:/app/logs # ログディレクトリを永続化
-      - audio_data:/app/public/audio # 生成された音声ファイルを永続化
     depends_on:
       - voicevox_engine
       - kokoro_tts

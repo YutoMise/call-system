@@ -18,6 +18,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            padding: 20px 0;
         }
         
         .container {
@@ -61,7 +62,7 @@
             font-weight: 500;
         }
         
-        input[type="text"], input[type="password"], textarea {
+        input[type="text"], input[type="password"], input[type="number"], textarea, select {
             width: 100%;
             padding: 12px;
             border: 2px solid #ddd;
@@ -70,7 +71,7 @@
             transition: border-color 0.3s;
         }
         
-        input[type="text"]:focus, input[type="password"]:focus, textarea:focus {
+        input[type="text"]:focus, input[type="password"]:focus, input[type="number"]:focus, textarea:focus, select:focus {
             outline: none;
             border-color: #667eea;
         }
@@ -174,7 +175,7 @@
             align-items: flex-start;
         }
         
-        .channel-info {
+        .channel-info-display {
             display: flex;
             flex-direction: column;
             gap: 5px;
@@ -196,6 +197,7 @@
             flex-direction: column;
             gap: 3px;
             font-size: 0.85em;
+            text-align: right;
         }
         
         .voice-lang {
@@ -225,36 +227,23 @@
 
         .form-row {
             display: flex;
+            flex-wrap: wrap;
             gap: 20px;
             align-items: end;
         }
 
         .form-row .form-group {
-            flex: 1;
+            flex: 1 1 150px;
             margin-bottom: 0;
         }
 
-        .form-row .form-group:nth-last-child(2) { /* 受付使用 */
+        .form-row .form-group.reception-group {
             flex: 0 0 100px;
             text-align: center;
         }
 
-        .form-row .form-group:last-child {
+        .form-row .form-group.button-group {
             flex: 0 0 auto;
-        }
-
-        .form-row select {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #ddd;
-            border-radius: 5px;
-            font-size: 16px;
-            transition: border-color 0.3s;
-        }
-
-        .form-row select:focus {
-            outline: none;
-            border-color: #667eea;
         }
 
         /* チェックボックスのスタイル調整 */
@@ -281,23 +270,15 @@
             padding: 15px;
             margin-bottom: 10px;
             display: flex;
-            align-items: flex-start; /* ボタンとグリッドの上端を揃える */
+            align-items: flex-start;
             gap: 15px;
         }
 
-        .channel-info {
+        .channel-info-grid {
             flex: 1;
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
             gap: 15px;
-        }
-
-        .channel-field {
-            /* flex: 1; は不要 */
-        }
-
-        .channel-field.reception-field {
-            text-align: center;
         }
 
         .channel-field label {
@@ -308,17 +289,15 @@
 
         .channel-field input,
         .channel-field select {
-            margin-bottom: 0;
-            width: 100%;
             padding: 8px;
             border: 1px solid #dee2e6;
             border-radius: 4px;
+            font-size: 14px;
         }
 
-        .channel-field select:focus,
-        .channel-field input:focus {
-            outline: none;
-            border-color: #667eea;
+        .channel-field.reception-field {
+            text-align: center;
+            align-self: center;
         }
 
         .channel-actions {
@@ -400,30 +379,33 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label for="newChannelName">チャンネル名:</label>
-                        <input type="text" id="newChannelName" placeholder="チャンネル名を入力">
+                        <input type="text" id="newChannelName" placeholder="チャンネル名">
                     </div>
                     <div class="form-group">
                         <label for="newChannelPassword">パスワード:</label>
-                        <input type="password" id="newChannelPassword" placeholder="パスワードを入力">
+                        <input type="password" id="newChannelPassword" placeholder="パスワード">
                     </div>
                     <div class="form-group">
                         <label>日本語音声ID:</label>
-                        <select id="newChannelJaVoiceId" class="form-row select"></select>
+                        <select id="newChannelJaVoiceId"></select>
                     </div>
                     <div class="form-group">
                         <label>英語音声ID:</label>
-                        <select id="newChannelEnVoiceId" class="form-row select"></select>
+                        <select id="newChannelEnVoiceId"></select>
+                    </div>
+                    <div class="form-group">
+                        <label>中国語音声ID:</label>
+                        <select id="newChannelCnVoiceId"></select>
                     </div>
                     <div class="form-group">
                         <label for="newChannelRoomCount">診察室数:</label>
-                        <input type="number" id="newChannelRoomCount" min="1" max="10" value="7" placeholder="診察室数 (1-10)">
+                        <input type="number" id="newChannelRoomCount" min="1" max="10" value="7">
                     </div>
-                    <div class="form-group">
+                    <div class="form-group reception-group">
                         <label for="newChannelUseReception">受付使用:</label>
                         <input type="checkbox" id="newChannelUseReception" checked>
-                        <span class="help-text">受付ボタンを表示するかどうか</span>
                     </div>
-                    <div class="form-group">
+                    <div class="form-group button-group">
                         <button class="btn btn-primary" onclick="addChannel()">追加</button>
                     </div>
                 </div>
@@ -442,9 +424,6 @@
                     <div class="form-group">
                         <label for="channelsJson">チャンネル設定JSON:</label>
                         <textarea id="channelsJson" placeholder="チャンネル設定をJSON形式で入力してください..."></textarea>
-                        <div class="help-text">
-                            形式: [{"name": "チャンネル名", "password": "パスワード", "voiceId": "voice1"}]
-                        </div>
                     </div>
                     <button class="btn" onclick="saveChannelsFromJson()">JSON から保存</button>
                 </details>
@@ -461,7 +440,7 @@
 
     <script>
         // グローバル変数として利用可能な音声リストを保持
-        let availableVoices = { japanese: [], english: [] };
+        let availableVoices = { japanese: [], english: [], chinese: [] };
 
         // 認証状態をチェック
         async function checkAuthStatus() {
@@ -494,9 +473,7 @@
             try {
                 const response = await fetch('/admin/login', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ username, password })
                 });
                 
@@ -536,7 +513,8 @@
                 if (data.success) {
                     availableVoices = {
                         japanese: data.japanese || [],
-                        english: data.english || []
+                        english: data.english || [],
+                        chinese: data.chinese || []
                     };
                     populateNewChannelVoiceSelectors();
                 } else {
@@ -558,21 +536,10 @@
                 }
 
                 const channels = await response.json();
-
-                // JSONテキストエリアを更新（存在する場合のみ）
-                const jsonTextarea = document.getElementById('channelsJson');
-                if (jsonTextarea) {
-                    jsonTextarea.value = JSON.stringify(channels, null, 2);
-                }
-
+                document.getElementById('channelsJson').value = JSON.stringify(channels, null, 2);
                 displayCurrentChannels(channels);
                 displayChannelsList(channels);
 
-                // フォームもクリア
-                document.getElementById('newChannelName').value = '';
-                document.getElementById('newChannelPassword').value = '';
-                document.getElementById('newChannelRoomCount').value = '7';
-                document.getElementById('newChannelUseReception').checked = true;
             } catch (error) {
                 showMessage('adminMessage', 'チャンネル情報の読み込みに失敗しました。', 'error');
             }
@@ -588,14 +555,16 @@
                 div.className = 'channel-item';
                 const jaVoice = getDisplayVoiceName(channel, 'japanese') || '未設定';
                 const enVoice = getDisplayVoiceName(channel, 'english') || '未設定';
+                const cnVoice = getDisplayVoiceName(channel, 'chinese') || '未設定';
                 div.innerHTML = `
-                    <div class="channel-info">
+                    <div class="channel-info-display">
                         <span class="channel-name">${escapeHtml(channel.name)}</span>
-                        <span class="channel-password">${escapeHtml(channel.password)}</span>
+                        <span class="channel-password">パスワード: ${escapeHtml(channel.password)}</span>
                     </div>
                     <div class="voice-info">
                         <div class="voice-lang">日本語: ${escapeHtml(jaVoice)}</div>
                         <div class="voice-lang">English: ${escapeHtml(enVoice)}</div>
+                        <div class="voice-lang">中文: ${escapeHtml(cnVoice)}</div>
                     </div>
                 `;
                 container.appendChild(div);
@@ -611,23 +580,12 @@
                 const div = document.createElement('div');
                 div.className = 'channel-row';
 
-                // 日本語音声のセレクトボックスHTMLを生成
-                const jaVoiceId = getJaVoiceId(channel);
-                let jaOptions = availableVoices.japanese.map(voice => 
-                    `<option value="${escapeHtml(voice)}" ${voice === jaVoiceId ? 'selected' : ''}>${escapeHtml(voice)}</option>`
-                ).join('');
-                const jaSelectHtml = `<select id="channelJaVoiceId_${index}">${jaOptions}</select>`;
-
-                // 英語音声のセレクトボックスHTMLを生成
-                const enVoiceId = getEnVoiceId(channel);
-                let enOptions = availableVoices.english.map(voice =>
-                    `<option value="${escapeHtml(voice)}" ${voice === enVoiceId ? 'selected' : ''}>${escapeHtml(voice)}</option>`
-                ).join('');
-                const enSelectHtml = `<select id="channelEnVoiceId_${index}">${enOptions}</select>`;
+                const jaSelectHtml = createVoiceSelectorHTML('japanese', getVoiceId(channel, 'japanese'), index);
+                const enSelectHtml = createVoiceSelectorHTML('english', getVoiceId(channel, 'english'), index);
+                const cnSelectHtml = createVoiceSelectorHTML('chinese', getVoiceId(channel, 'chinese'), index);
 
                 div.innerHTML = `
-                <div class="channel-info">
-                    <!-- 1行目 -->
+                <div class="channel-info-grid">
                     <div class="channel-field">
                         <label for="channelName_${index}">チャンネル名</label>
                         <input type="text" value="${escapeHtml(channel.name)}" id="channelName_${index}">
@@ -636,7 +594,6 @@
                         <label for="channelPassword_${index}">パスワード</label>
                         <input type="password" value="${escapeHtml(channel.password)}" id="channelPassword_${index}">
                     </div>
-                    <!-- 2行目 -->
                     <div class="channel-field">
                         <label for="channelJaVoiceId_${index}">日本語音声ID</label>
                         ${jaSelectHtml}
@@ -645,7 +602,10 @@
                         <label for="channelEnVoiceId_${index}">英語音声ID</label>
                         ${enSelectHtml}
                     </div>
-                    <!-- 3行目 -->
+                    <div class="channel-field">
+                        <label for="channelCnVoiceId_${index}">中国語音声ID</label>
+                        ${cnSelectHtml}
+                    </div>
                     <div class="channel-field">
                         <label for="channelRoomCount_${index}">診察室数</label>
                         <input type="number" min="1" max="10" value="${channel.roomCount || 7}" id="channelRoomCount_${index}">
@@ -666,24 +626,33 @@
 
         // 新規追加フォームの音声セレクターを埋める
         function populateNewChannelVoiceSelectors() {
-            const jaSelect = document.getElementById('newChannelJaVoiceId');
-            const enSelect = document.getElementById('newChannelEnVoiceId');
-            
-            jaSelect.innerHTML = '';
-            availableVoices.japanese.forEach(voiceId => {
-                const option = document.createElement('option');
-                option.value = voiceId;
-                option.textContent = voiceId;
-                jaSelect.appendChild(option);
-            });
+            populateVoiceSelector('newChannelJaVoiceId', availableVoices.japanese);
+            populateVoiceSelector('newChannelEnVoiceId', availableVoices.english);
+            populateVoiceSelector('newChannelCnVoiceId', availableVoices.chinese);
+        }
 
-            enSelect.innerHTML = '';
-            availableVoices.english.forEach(voiceId => {
+        function populateVoiceSelector(selectId, voices) {
+            const select = document.getElementById(selectId);
+            select.innerHTML = '';
+            voices.forEach(voiceId => {
                 const option = document.createElement('option');
                 option.value = voiceId;
                 option.textContent = voiceId;
-                enSelect.appendChild(option);
+                select.appendChild(option);
             });
+        }
+
+        function createVoiceSelectorHTML(lang, selectedVoiceId, index) {
+            let langPrefix;
+            if (lang === 'japanese') langPrefix = 'Ja';
+            else if (lang === 'english') langPrefix = 'En';
+            else if (lang === 'chinese') langPrefix = 'Cn';
+            else langPrefix = lang.slice(0, 2); // Fallback
+            const voices = availableVoices[lang] || [];
+            let options = voices.map(voice =>
+                `<option value="${escapeHtml(voice)}" ${voice === selectedVoiceId ? 'selected' : ''}>${escapeHtml(voice)}</option>`
+            ).join('');
+            return `<select id="channel${langPrefix}VoiceId_${index}">${options}</select>`;
         }
         
         // 新しいチャンネルを追加
@@ -692,59 +661,39 @@
             const password = document.getElementById('newChannelPassword').value.trim();
             const jaVoiceId = document.getElementById('newChannelJaVoiceId').value;
             const enVoiceId = document.getElementById('newChannelEnVoiceId').value;
+            const cnVoiceId = document.getElementById('newChannelCnVoiceId').value;
             const roomCount = parseInt(document.getElementById('newChannelRoomCount').value) || 7;
             const useReception = document.getElementById('newChannelUseReception').checked;
 
             if (!name || !password) {
-                showMessage('adminMessage', 'チャンネル名とパスワードを入力してください。', 'error');
-                return;
+                return showMessage('adminMessage', 'チャンネル名とパスワードを入力してください。', 'error');
             }
-
             if (roomCount < 1 || roomCount > 10) {
-                showMessage('adminMessage', '診察室数は1-10の範囲で入力してください。', 'error');
-                return;
+                return showMessage('adminMessage', '診察室数は1-10の範囲で入力してください。', 'error');
             }
 
             try {
-                // 現在のチャンネル一覧を取得
                 const response = await fetch('/admin/api/channels');
-                if (response.status === 401) {
-                    showLoginForm();
-                    return;
-                }
-
+                if (response.status === 401) return showLoginForm();
                 const channels = await response.json();
 
-                // 重複チェック
                 if (channels.some(channel => channel.name === name)) {
-                    showMessage('adminMessage', 'そのチャンネル名は既に存在します。', 'error');
-                    return;
+                    return showMessage('adminMessage', 'そのチャンネル名は既に存在します。', 'error');
                 }
 
-                // 新しいチャンネルを追加（voiceConfig構造で）
                 const newChannel = {
-                    name,
-                    password,
-                    roomCount,
-                    useReception,
+                    name, password, roomCount, useReception,
                     voiceConfig: {
-                        japanese: {
-                            voiceId: jaVoiceId
-                        },
-                        english: {
-                            voiceId: enVoiceId
-                        }
+                        japanese: { voiceId: jaVoiceId },
+                        english: { voiceId: enVoiceId },
+                        chinese: { voiceId: cnVoiceId }
                     }
                 };
                 channels.push(newChannel);
 
                 await saveChannelsData(channels);
-                // フォームをクリア
                 document.getElementById('newChannelName').value = '';
                 document.getElementById('newChannelPassword').value = '';
-                document.getElementById('newChannelRoomCount').value = '7';
-                document.getElementById('newChannelUseReception').checked = true;
-
             } catch (error) {
                 showMessage('adminMessage', 'チャンネルの追加に失敗しました。', 'error');
             }
@@ -756,52 +705,35 @@
             const password = document.getElementById(`channelPassword_${index}`).value.trim();
             const jaVoiceId = document.getElementById(`channelJaVoiceId_${index}`).value;
             const enVoiceId = document.getElementById(`channelEnVoiceId_${index}`).value;
+            const cnVoiceId = document.getElementById(`channelCnVoiceId_${index}`).value;
             const roomCount = parseInt(document.getElementById(`channelRoomCount_${index}`).value) || 7;
             const useReception = document.getElementById(`channelUseReception_${index}`).checked;
 
             if (!name || !password) {
-                showMessage('adminMessage', 'チャンネル名とパスワードを入力してください。', 'error');
-                return;
+                return showMessage('adminMessage', 'チャンネル名とパスワードを入力してください。', 'error');
             }
-
             if (roomCount < 1 || roomCount > 10) {
-                showMessage('adminMessage', '診察室数は1-10の範囲で入力してください。', 'error');
-                return;
+                return showMessage('adminMessage', '診察室数は1-10の範囲で入力してください。', 'error');
             }
 
             try {
-                // 現在のチャンネル一覧を取得
                 const response = await fetch('/admin/api/channels');
-                if (response.status === 401) {
-                    showLoginForm();
-                    return;
-                }
-
+                if (response.status === 401) return showLoginForm();
                 const channels = await response.json();
 
-                // 重複チェック（自分以外）
                 if (channels.some((channel, i) => i !== index && channel.name === name)) {
-                    showMessage('adminMessage', 'そのチャンネル名は既に存在します。', 'error');
-                    return;
+                    return showMessage('adminMessage', 'そのチャンネル名は既に存在します。', 'error');
                 }
 
-                // チャンネルを更新（voiceConfig構造で）
                 channels[index] = {
-                    name,
-                    password,
-                    roomCount,
-                    useReception,
+                    name, password, roomCount, useReception,
                     voiceConfig: {
-                        japanese: {
-                            voiceId: jaVoiceId
-                        },
-                        english: {
-                            voiceId: enVoiceId
-                        }
+                        japanese: { voiceId: jaVoiceId },
+                        english: { voiceId: enVoiceId },
+                        chinese: { voiceId: cnVoiceId }
                     }
                 };
                 await saveChannelsData(channels);
-
             } catch (error) {
                 showMessage('adminMessage', 'チャンネルの更新に失敗しました。', 'error');
             }
@@ -809,25 +741,14 @@
 
         // チャンネルを削除
         async function deleteChannel(index) {
-            if (!confirm('このチャンネルを削除しますか？')) {
-                return;
-            }
+            if (!confirm('このチャンネルを削除しますか？')) return;
 
             try {
-                // 現在のチャンネル一覧を取得
                 const response = await fetch('/admin/api/channels');
-                if (response.status === 401) {
-                    showLoginForm();
-                    return;
-                }
-
+                if (response.status === 401) return showLoginForm();
                 const channels = await response.json();
-
-                // チャンネルを削除
                 channels.splice(index, 1);
-
                 await saveChannelsData(channels);
-
             } catch (error) {
                 showMessage('adminMessage', 'チャンネルの削除に失敗しました。', 'error');
             }
@@ -837,61 +758,45 @@
         async function saveChannelsData(channels) {
             const response = await fetch('/admin/api/channels', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(channels)
             });
 
-            if (response.status === 401) {
-                showLoginForm();
-                return;
-            }
-
+            if (response.status === 401) return showLoginForm();
             const data = await response.json();
 
             if (data.success) {
                 showMessage('adminMessage', data.message, 'success');
+                document.getElementById('channelsJson').value = JSON.stringify(channels, null, 2);
                 displayCurrentChannels(channels);
                 displayChannelsList(channels);
-                // JSONテキストエリアも更新（存在する場合のみ）
-                const jsonTextarea = document.getElementById('channelsJson');
-                if (jsonTextarea) {
-                    jsonTextarea.value = JSON.stringify(channels, null, 2);
-                }
             } else {
                 showMessage('adminMessage', data.message, 'error');
             }
         }
 
-        // JSONから保存（従来の機能）
+        // JSONから保存
         async function saveChannelsFromJson() {
             const jsonText = document.getElementById('channelsJson').value;
-
             try {
                 const channels = JSON.parse(jsonText);
                 await saveChannelsData(channels);
             } catch (error) {
-                if (error instanceof SyntaxError) {
-                    showMessage('adminMessage', 'JSON形式が正しくありません。', 'error');
-                } else {
-                    showMessage('adminMessage', '保存に失敗しました。', 'error');
-                }
+                showMessage('adminMessage', error instanceof SyntaxError ? 'JSON形式が正しくありません。' : '保存に失敗しました。', 'error');
             }
         }
         
         // デフォルト設定に戻す
         async function resetToDefault() {
-            if (confirm('デフォルト設定に戻しますか？')) {
-                const defaultChannels = [
-                    {"name": "yaesu", "password": "orca", "voiceId": "voice1"},
-                    {"name": "chiba", "password": "orca", "voiceId": "voice1"},
-                    {"name": "familia", "password": "orca", "voiceId": "voice1"},
-                    {"name": "marunouchi", "password": "orca", "voiceId": "voice1"}
-                ];
-
+            if (confirm('デフォルト設定に戻しますか？この操作は取り消せません。')) {
                 try {
-                    await saveChannelsData(defaultChannels);
+                    const response = await fetch('/admin/api/channels/default', { method: 'POST' });
+                    const data = await response.json();
+                    if(data.success) {
+                        await saveChannelsData(data.channels);
+                    } else {
+                        showMessage('adminMessage', 'デフォルト設定の取得に失敗しました。', 'error');
+                    }
                 } catch (error) {
                     showMessage('adminMessage', 'デフォルト設定への復元に失敗しました。', 'error');
                 }
@@ -902,8 +807,6 @@
         function showLoginForm() {
             document.getElementById('loginForm').style.display = 'block';
             document.getElementById('adminPanel').style.display = 'none';
-            document.getElementById('username').value = '';
-            document.getElementById('password').value = '';
         }
         
         function showAdminPanel() {
@@ -917,45 +820,31 @@
             element.textContent = message;
             element.className = `message ${type}`;
             element.style.display = 'block';
-            
-            setTimeout(() => {
-                element.style.display = 'none';
-            }, 5000);
+            setTimeout(() => { element.style.display = 'none'; }, 5000);
         }
         
         // HTMLエスケープ
         function escapeHtml(text) {
+            if (text === null || text === undefined) return '';
             const div = document.createElement('div');
             div.textContent = text;
             return div.innerHTML;
         }
 
         // voiceConfig対応のヘルパー関数
-        function getJaVoiceId(channel) {
-            return channel.voiceConfig?.japanese?.voiceId || channel.voiceId || 'voice1';
+        function getVoiceId(channel, language) {
+            return channel.voiceConfig?.[language]?.voiceId || null;
         }
 
-        function getEnVoiceId(channel) {
-            return channel.voiceConfig?.english?.voiceId || 'en_voice1';
-        }
-
-        // 音声ID表示名を生成
         function getDisplayVoiceName(channel, language) {
-            if (language === 'japanese') {
-                return getJaVoiceId(channel);
-            } else {
-                return getEnVoiceId(channel);
-            }
+            return getVoiceId(channel, language);
         }
         
-        // Enterキーでログイン
+        // 初期化処理
         document.addEventListener('DOMContentLoaded', function() {
-            document.getElementById('password').addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    login();
-                }
+            document.getElementById('password').addEventListener('keypress', e => {
+                if (e.key === 'Enter') login();
             });
-            
             checkAuthStatus();
         });
     </script>
