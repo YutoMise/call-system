@@ -74,6 +74,44 @@ function generateRoomButtons(roomCount, useReception) {
     }
 }
 
+// 整理券番号の半角制限と変換
+function setupTicketNumberValidation() {
+    if (ticketNumberInput) {
+        // 入力時のリアルタイム制限
+        ticketNumberInput.addEventListener('input', function(e) {
+            // 全角数字を半角に変換し、数字以外を除去
+            let value = e.target.value;
+            
+            // 全角数字を半角数字に変換
+            value = value.replace(/[０-９]/g, function(s) {
+                return String.fromCharCode(s.charCodeAt(0) - 0xFEE0);
+            });
+            
+            // 半角数字以外を除去
+            value = value.replace(/[^0-9]/g, '');
+            
+            // 値を更新
+            e.target.value = value;
+        });
+
+        // ペースト時の制限
+        ticketNumberInput.addEventListener('paste', function(e) {
+            e.preventDefault();
+            let paste = (e.clipboardData || window.clipboardData).getData('text');
+            
+            // 全角数字を半角に変換
+            paste = paste.replace(/[０-９]/g, function(s) {
+                return String.fromCharCode(s.charCodeAt(0) - 0xFEE0);
+            });
+            
+            // 半角数字以外を除去
+            paste = paste.replace(/[^0-9]/g, '');
+            
+            e.target.value = paste;
+        });
+    }
+}
+
 // 言語を指定してアナウンス実行
 async function announceWithLanguage(language) {
     const ticketNumber = ticketNumberInput.value.trim();
@@ -305,6 +343,7 @@ function initializeApp() {
     initializeDOM();
     setupEventListeners();
     generateRoomButtons(7, true);
+    setupTicketNumberValidation();
 
     const savedChannel = localStorage.getItem('selectedChannel');
     const savedPassword = localStorage.getItem('channelPassword');

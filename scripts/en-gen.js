@@ -5,6 +5,7 @@ const { spawnSync } = require('node:child_process'); // ffmpeg実行のため追
 const path = require('node:path');
 const ffmpegPath = require('ffmpeg-static');
 const fetch = require('node-fetch');
+const { getMessage } = require('./audio-messages'); // メッセージ設定を読み込み
 
 const KOKORO_TTS_API_URL = process.env.KOKORO_TTS_URL || 'http://localhost:8880';
 const OUTPUT_BASE_DIR = path.join(__dirname, '../public/audio/pregenerated/english');
@@ -215,7 +216,7 @@ async function generateAllAudioFiles(voiceId, voice, speed, ticketStart, ticketE
         console.log(`ディレクトリを作成しました: ${outputDir}`);
     }
 
-    // 「Ticket number X, please come forward」 (指定範囲)
+    // Patient number X, 」 (指定範囲)
     for (let i = ticketStart; i <= ticketEnd; i++) {
         const baseTicketFilename = `ticket_${i}`;
         const targetTicketFilename = `${baseTicketFilename}.${TARGET_FORMAT}`;
@@ -224,7 +225,7 @@ async function generateAllAudioFiles(voiceId, voice, speed, ticketStart, ticketE
             continue;
         }
         await fetchAndSaveAudio(
-            `Patient number ${i},`,
+            getMessage('english', 'ticket', i),
             baseTicketFilename,
             voice,
             speed,
@@ -242,7 +243,7 @@ async function generateAllAudioFiles(voiceId, voice, speed, ticketStart, ticketE
             continue;
         }
         await fetchAndSaveAudio(
-            `please come to examination room ${i}.`,
+            getMessage('english', 'room', i),
             baseRoomFilename,
             voice,
             speed,
@@ -256,7 +257,7 @@ async function generateAllAudioFiles(voiceId, voice, speed, ticketStart, ticketE
     const targetReceptionFilename = `${baseReceptionFilename}.${TARGET_FORMAT}`;
     if (!fs.existsSync(path.join(outputDir, targetReceptionFilename))) {
         await fetchAndSaveAudio(
-            `please come to the reception desk.`,
+            getMessage('english', 'reception'),
             baseReceptionFilename,
             voice,
             speed,

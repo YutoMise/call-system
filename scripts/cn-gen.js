@@ -5,6 +5,7 @@ const { spawnSync } = require('node:child_process'); // ffmpeg実行のため追
 const path = require('node:path');
 const ffmpegPath = require('ffmpeg-static');
 const fetch = require('node-fetch');
+const { getMessage } = require('./audio-messages'); // メッセージ設定を読み込み
 
 const KOKORO_TTS_API_URL = process.env.KOKORO_TTS_URL || 'http://localhost:8880';
 const OUTPUT_BASE_DIR = path.join(__dirname, '../public/audio/pregenerated/chinese'); // ★変更点: 出力ディレクトリ
@@ -184,7 +185,7 @@ async function generateAllAudioFiles(voiceId, voice, speed, ticketStart, ticketE
             continue;
         }
         await fetchAndSaveAudio(
-            `${i}號的病人，`,
+            getMessage('chinese', 'ticket', i),
             baseTicketFilename,
             voice,
             speed,
@@ -202,7 +203,7 @@ async function generateAllAudioFiles(voiceId, voice, speed, ticketStart, ticketE
             continue;
         }
         await fetchAndSaveAudio(
-            `請前往${i}號診療室。`,
+            getMessage('chinese', 'room', i),
             baseRoomFilename,
             voice,
             speed,
@@ -216,7 +217,7 @@ async function generateAllAudioFiles(voiceId, voice, speed, ticketStart, ticketE
     const targetReceptionFilename = `${baseReceptionFilename}.${TARGET_FORMAT}`;
     if (!fs.existsSync(path.join(outputDir, targetReceptionFilename))) {
         await fetchAndSaveAudio(
-            `請到掛號處。`,
+            getMessage('chinese', 'reception'),
             baseReceptionFilename,
             voice,
             speed,

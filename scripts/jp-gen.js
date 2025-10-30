@@ -8,6 +8,7 @@ const path = require('node:path');
 // 以下は node-fetch v2 を想定した書き方です。
 const ffmpegPath = require('ffmpeg-static');
 const fetch = require('node-fetch');
+const { getMessage } = require('./audio-messages'); // メッセージ設定を読み込み
 
 const VOICEVOX_API_URL = process.env.VOICEVOX_URL || 'http://localhost:50021';
 const OUTPUT_BASE_DIR = path.join(__dirname, '../public/audio/pregenerated/japanese');
@@ -263,7 +264,7 @@ async function generateAllAudioFiles(voiceId, speakerId, pitch, speed, ticketSta
             continue;
         }
         await fetchAndSaveAudio(
-            `呼び出し番号 ${i}番のかた`,
+            getMessage('japanese', 'ticket', i),
             baseTicketFilename,
             speakerId,
             pitch,
@@ -282,7 +283,7 @@ async function generateAllAudioFiles(voiceId, speakerId, pitch, speed, ticketSta
             continue;
         }
         await fetchAndSaveAudio(
-            `${i}番診察室へお越しください。`,
+            getMessage('japanese', 'room', i),
             baseRoomFilename,
             speakerId,
             pitch,
@@ -297,7 +298,7 @@ async function generateAllAudioFiles(voiceId, speakerId, pitch, speed, ticketSta
     const targetReceptionFilename = `${baseReceptionFilename}.${TARGET_FORMAT}`;
     if (!fs.existsSync(path.join(outputDir, targetReceptionFilename))) {
         await fetchAndSaveAudio(
-            `受付にお越しください。`,
+            getMessage('japanese', 'reception'),
             baseReceptionFilename,
             speakerId,
             pitch,
