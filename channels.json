@@ -1,0 +1,128 @@
+[
+  {
+    "name": "yaesu",
+    "password": "orca",
+    "roomCount": 5,
+    "useReception": true,
+    "useXray": false,
+    "voiceConfig": {
+      "japanese": {
+        "voiceId": "voice1"
+      },
+      "english": {
+        "voiceId": "voice1"
+      },
+      "chinese": {
+        "voiceId": "voice1"
+      }
+    }
+  },
+  {
+    "name": "chiba",
+    "password": "orca",
+    "roomCount": 7,
+    "useReception": true,
+    "useXray": false,
+    "voiceConfig": {
+      "japanese": {
+        "voiceId": "voice1"
+      },
+      "english": {
+        "voiceId": "voice1"
+      },
+      "chinese": {
+        "voiceId": "voice1"
+      }
+    }
+  },
+  {
+    "name": "familia",
+    "password": "orca",
+    "roomCount": 5,
+    "useReception": true,
+    "useXray": true,
+    "voiceConfig": {
+      "japanese": {
+        "voiceId": "voice1"
+      },
+      "english": {
+        "voiceId": "voice1"
+      },
+      "chinese": {
+        "voiceId": "voice1"
+      }
+    }
+  },
+  {
+    "name": "ueno",
+    "password": "orca",
+    "roomCount": 7,
+    "useReception": true,
+    "useXray": true,
+    "voiceConfig": {
+      "japanese": {
+        "voiceId": "voice1"
+      },
+      "english": {
+        "voiceId": "voice1"
+      },
+      "chinese": {
+        "voiceId": "voice1"
+      }
+    }
+  },
+  {
+    "name": "demo",
+    "password": "orca",
+    "roomCount": 7,
+    "useReception": true,
+    "useXray": true,
+    "voiceConfig": {
+      "japanese": {
+        "voiceId": "voice1"
+      },
+      "english": {
+        "voiceId": "voice1"
+      },
+      "chinese": {
+        "voiceId": "voice1"
+      }
+    }
+  },
+  {
+    "name": "marunouchi",
+    "password": "orca",
+    "roomCount": 6,
+    "useReception": true,
+    "useXray": false,
+    "voiceConfig": {
+      "japanese": {
+        "voiceId": "voice1"
+      },
+      "english": {
+        "voiceId": "voice1"
+      },
+      "chinese": {
+        "voiceId": "voice1"
+      }
+    }
+  },
+  {
+    "name": "tsic",
+    "password": "orca",
+    "roomCount": 4,
+    "useReception": false,
+    "useXray": false,
+    "voiceConfig": {
+      "japanese": {
+        "voiceId": "voice1"
+      },
+      "english": {
+        "voiceId": "voice1"
+      },
+      "chinese": {
+        "voiceId": "voice1"
+      }
+    }
+  }
+]

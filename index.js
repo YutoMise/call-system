@@ -487,7 +487,8 @@ app.get('/api/channel-details', (req, res) => {
         name: channel.name,
         voiceId: channel.voiceId || 'voice1', // デフォルト値を設定
         roomCount: channel.roomCount || 7, // デフォルト値を設定
-        useReception: channel.useReception !== false // デフォルト値を設定
+        useReception: channel.useReception !== false, // デフォルト値を設定
+        useXray: channel.useXray === true // デフォルト値を設定
     }));
     res.json(channelDetails);
 });
@@ -523,6 +524,11 @@ app.post('/admin/api/channels', requireAdminAuth, async (req, res) => {
             // useReceptionのバリデーション
             if (channel.useReception !== undefined && typeof channel.useReception !== 'boolean') {
                 return res.status(400).json({ message: '受付使用設定はboolean値である必要があります。' });
+            }
+
+            // useXrayのバリデーション
+            if (channel.useXray !== undefined && typeof channel.useXray !== 'boolean') {
+                return res.status(400).json({ message: 'レントゲン室使用設定はboolean値である必要があります。' });
             }
         }
 
@@ -673,10 +679,11 @@ app.put('/api/channels-config/:index', async (req, res) => {
         
         // ファイルに保存
         await fs.writeFile(CHANNELS_FILE, JSON.stringify(channels, null, 2));
-        await logger.channel('update', channelData.name, { 
-            channelIndex: index, 
+        await logger.channel('update', channelData.name, {
+            channelIndex: index,
             roomCount: channelData.roomCount,
             useReception: channelData.useReception,
+            useXray: channelData.useXray,
             voiceConfigUpdated: true
         });
         

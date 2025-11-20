@@ -310,6 +310,23 @@ async function generateAllAudioFiles(voiceId, speakerId, pitch, speed, ticketSta
         console.log(`スキップ (既存): ${voiceId}/${targetReceptionFilename}`);
     }
 
+    // 「レントゲン室へお越しください。」
+    const baseXrayFilename = `room_xray`;
+    const targetXrayFilename = `${baseXrayFilename}.${TARGET_FORMAT}`;
+    if (!fs.existsSync(path.join(outputDir, targetXrayFilename))) {
+        await fetchAndSaveAudio(
+            getMessage('japanese', 'xray'),
+            baseXrayFilename,
+            speakerId,
+            pitch,
+            speed,
+            outputDir
+        );
+        await new Promise(resolve => setTimeout(resolve, 200)); // APIへの負荷軽減
+    } else {
+        console.log(`スキップ (既存): ${voiceId}/${targetXrayFilename}`);
+    }
+
     console.log(`音声ファイルの生成が完了しました: ${voiceId}`);
 }
 

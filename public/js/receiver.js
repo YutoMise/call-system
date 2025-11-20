@@ -26,7 +26,6 @@ let silentGainNode = null;
 let isSilentAudioPlaying = false;
 let silentAudioMonitorInterval = null;
 
-const SILENT_AUDIO_FILE_URL = '/audio/silent.wav';
 const CALL_SIGN_AUDIO_URL = '/audio/call-sign.wav';
 const PREGENERATED_AUDIO_BASE_PATH = '/audio/pregenerated/'; // 事前生成音声のベースパス
 

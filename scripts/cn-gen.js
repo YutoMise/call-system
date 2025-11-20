@@ -228,6 +228,22 @@ async function generateAllAudioFiles(voiceId, voice, speed, ticketStart, ticketE
         console.log(`スキップ (既存): ${voiceId}/${targetReceptionFilename}`);
     }
 
+    // 「請到X光室。」 (レントゲン室)
+    const baseXrayFilename = `room_xray`;
+    const targetXrayFilename = `${baseXrayFilename}.${TARGET_FORMAT}`;
+    if (!fs.existsSync(path.join(outputDir, targetXrayFilename))) {
+        await fetchAndSaveAudio(
+            getMessage('chinese', 'xray'),
+            baseXrayFilename,
+            voice,
+            speed,
+            outputDir
+        );
+        await new Promise(resolve => setTimeout(resolve, 200));
+    } else {
+        console.log(`スキップ (既存): ${voiceId}/${targetXrayFilename}`);
+    }
+
     console.log(`Kokoro TTS音声ファイル(中国語)の生成が完了しました: ${voiceId}`);
 }
 

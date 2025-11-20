@@ -13,7 +13,9 @@ const AUDIO_MESSAGES = {
         // 診察室への案内
         room: '{number}番診察室へお越しください。',
         // 受付への案内
-        reception: '受付にお越しください。'
+        reception: '受付にお越しください。',
+        // レントゲン室への案内
+        xray: 'レントゲン室へお越しください。'
     },
 
     // 英語メッセージ
@@ -23,7 +25,9 @@ const AUDIO_MESSAGES = {
         // 診察室への案内
         room: 'please come to examination room {number}.',
         // 受付への案内
-        reception: 'please come to the reception desk.'
+        reception: 'please come to the reception desk.',
+        // レントゲン室への案内
+        xray: 'please come to the X-ray room.'
     },
 
     // 中国語メッセージ
@@ -33,7 +37,9 @@ const AUDIO_MESSAGES = {
         // 診察室への案内
         room: '請前往{number}號診療室。',
         // 受付への案内
-        reception: '請到掛號處。'
+        reception: '請到掛號處。',
+        // レントゲン室への案内
+        xray: '請到X光室。'
     }
 };
 

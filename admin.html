@@ -405,6 +405,10 @@
                         <label for="newChannelUseReception">受付使用:</label>
                         <input type="checkbox" id="newChannelUseReception" checked>
                     </div>
+                    <div class="form-group reception-group">
+                        <label for="newChannelUseXray">レントゲン室使用:</label>
+                        <input type="checkbox" id="newChannelUseXray">
+                    </div>
                     <div class="form-group button-group">
                         <button class="btn btn-primary" onclick="addChannel()">追加</button>
                     </div>
@@ -614,6 +618,10 @@
                         <label for="channelUseReception_${index}">受付使用</label>
                         <input type="checkbox" ${channel.useReception !== false ? 'checked' : ''} id="channelUseReception_${index}">
                     </div>
+                    <div class="channel-field reception-field">
+                        <label for="channelUseXray_${index}">レントゲン室使用</label>
+                        <input type="checkbox" ${channel.useXray === true ? 'checked' : ''} id="channelUseXray_${index}">
+                    </div>
                 </div>
                 <div class="channel-actions">
                     <button class="btn btn-success btn-small" onclick="updateChannel(${index})">更新</button>
@@ -664,6 +672,7 @@
             const cnVoiceId = document.getElementById('newChannelCnVoiceId').value;
             const roomCount = parseInt(document.getElementById('newChannelRoomCount').value) || 7;
             const useReception = document.getElementById('newChannelUseReception').checked;
+            const useXray = document.getElementById('newChannelUseXray').checked;
 
             if (!name || !password) {
                 return showMessage('adminMessage', 'チャンネル名とパスワードを入力してください。', 'error');
@@ -682,7 +691,7 @@
                 }
 
                 const newChannel = {
-                    name, password, roomCount, useReception,
+                    name, password, roomCount, useReception, useXray,
                     voiceConfig: {
                         japanese: { voiceId: jaVoiceId },
                         english: { voiceId: enVoiceId },
@@ -708,6 +717,7 @@
             const cnVoiceId = document.getElementById(`channelCnVoiceId_${index}`).value;
             const roomCount = parseInt(document.getElementById(`channelRoomCount_${index}`).value) || 7;
             const useReception = document.getElementById(`channelUseReception_${index}`).checked;
+            const useXray = document.getElementById(`channelUseXray_${index}`).checked;
 
             if (!name || !password) {
                 return showMessage('adminMessage', 'チャンネル名とパスワードを入力してください。', 'error');
@@ -726,7 +736,7 @@
                 }
 
                 channels[index] = {
-                    name, password, roomCount, useReception,
+                    name, password, roomCount, useReception, useXray,
                     voiceConfig: {
                         japanese: { voiceId: jaVoiceId },
                         english: { voiceId: enVoiceId },

@@ -36,7 +36,7 @@ function initializeDOM() {
 }
 
 // 診察室ボタンを動的に生成する関数
-function generateRoomButtons(roomCount, useReception) {
+function generateRoomButtons(roomCount, useReception, useXray) {
     // 既存のボタンをクリア
     roomButtonsContainer.innerHTML = '';
     selectedRoom = null;
@@ -71,6 +71,22 @@ function generateRoomButtons(roomCount, useReception) {
             selectedRoom = receptionButton.dataset.room; // 選択された部屋番号を保持
         });
         roomButtonsContainer.appendChild(receptionButton);
+    }
+
+    // レントゲン室ボタンを生成（useXrayがtrueの場合のみ）
+    if (useXray) {
+        const xrayButton = document.createElement('button');
+        xrayButton.textContent = 'レントゲン室';
+        xrayButton.dataset.room = 'xray';
+        xrayButton.addEventListener('click', (event) => {
+            event.preventDefault(); // フォーム送信を防ぐ
+            // すべてのボタンから 'selected' クラスを削除
+            roomButtonsContainer.querySelectorAll('button').forEach(btn => btn.classList.remove('selected'));
+            // クリックされたボタンに 'selected' クラスを追加
+            xrayButton.classList.add('selected');
+            selectedRoom = xrayButton.dataset.room; // 選択された部屋番号を保持
+        });
+        roomButtonsContainer.appendChild(xrayButton);
     }
 }
 
@@ -300,7 +316,7 @@ async function fetchChannelDetails() {
 
 async function onChannelChange() {
     if (!currentChannelName) {
-        generateRoomButtons(7, true);
+        generateRoomButtons(7, true, false);
         currentChannelConfig = null;
         return;
     }
@@ -311,14 +327,18 @@ async function onChannelChange() {
 
         if (channelConfig) {
             currentChannelConfig = channelConfig;
-            generateRoomButtons(channelConfig.roomCount || 7, channelConfig.useReception !== false);
+            generateRoomButtons(
+                channelConfig.roomCount || 7,
+                channelConfig.useReception !== false,
+                channelConfig.useXray === true
+            );
         } else {
-            generateRoomButtons(7, true);
+            generateRoomButtons(7, true, false);
             currentChannelConfig = null;
         }
     } catch (error) {
         console.error('チャンネル設定取得エラー:', error);
-        generateRoomButtons(7, true);
+        generateRoomButtons(7, true, false);
         currentChannelConfig = null;
     }
 }
@@ -342,7 +362,7 @@ function setupEventListeners() {
 function initializeApp() {
     initializeDOM();
     setupEventListeners();
-    generateRoomButtons(7, true);
+    generateRoomButtons(7, true, false);
     setupTicketNumberValidation();
 
     const savedChannel = localStorage.getItem('selectedChannel');

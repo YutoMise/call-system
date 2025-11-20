@@ -6,16 +6,6 @@ yarn-error.log*
 
 # Environment variables
 .env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-
-# Runtime data
-pids
-*.pid
-*.seed
-*.pid.lock
 
 # Logs
 logs/
@@ -57,15 +47,6 @@ Thumbs.db
 # Temporary files
 *.tmp
 *.temp
-
-# Audio files (if generated)
-public/audio/
-*.wav
-*.mp3
-
-# Settings that might contain sensitive data
-settings.json
-channels.json
 
 # CLAUDE.md
 CLAUDE.md
